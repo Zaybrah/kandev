@@ -18,7 +18,7 @@ import { UnsavedChangesBadge, UnsavedSaveButton } from "@/components/settings/un
 import { ProfileFormFields } from "@/components/settings/profile-form-fields";
 import type { Agent, ModelConfig, PermissionSetting, PassthroughConfig } from "@/lib/types/http";
 import { ProfileMcpConfigCard } from "./profile-mcp-config-card";
-import type { DraftProfile, DraftAgent } from "./agent-save-helpers";
+import { toAgentProfilePatch, type DraftProfile, type DraftAgent } from "./agent-save-helpers";
 
 export type AgentHeaderProps = {
   displayName: string;
@@ -122,7 +122,7 @@ export function ProfileCardItem({
             cli_passthrough: profile.cliPassthrough ?? false,
             cli_flags: profile.cliFlags ?? [],
           }}
-          onChange={(patch) => onProfileChange(profile.id, patch)}
+          onChange={(patch) => onProfileChange(profile.id, toAgentProfilePatch(patch))}
           modelConfig={currentAgentModelConfig}
           permissionSettings={permissionSettings}
           passthroughConfig={passthroughConfig}
