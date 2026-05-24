@@ -314,7 +314,7 @@ function useIssueData(id: string) {
   useEffect(() => {
     if (!workspaceId) return;
     const cached = qc.getQueryData<OfficeTask[]>(["office", workspaceId, "tasks"]);
-    if (cached) cachedTasksRef.current = cached;
+    cachedTasksRef.current = cached ?? null;
   }, [qc, workspaceId]);
 
   const [task, setTask] = useState<Task | null>(null);

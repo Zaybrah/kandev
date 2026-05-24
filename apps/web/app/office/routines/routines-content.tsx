@@ -154,14 +154,13 @@ function useRoutinesData(workspaceId: string | null) {
 
   useEffect(() => {
     let cancelled = false;
-    void fetchRoutines();
     fetchRuns().then((next) => {
       if (!cancelled) setRuns(next);
     });
     return () => {
       cancelled = true;
     };
-  }, [fetchRoutines, fetchRuns]);
+  }, [fetchRuns]);
 
   useEffect(() => {
     let cancelled = false;

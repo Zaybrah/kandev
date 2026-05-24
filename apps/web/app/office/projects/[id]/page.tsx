@@ -26,7 +26,7 @@ export default function ProjectDetailPage({ params }: PageProps) {
   const router = useRouter();
   const workspaceId = useAppStore((s) => s.workspaces.activeId);
   const qc = useQueryClient();
-  const { data: project } = useQuery({
+  const { data: project, isPending, isError } = useQuery({
     ...officeQueryOptions.projects(workspaceId ?? ""),
     enabled: !!workspaceId,
     select: (projects) => projects.find((p) => p.id === id),
@@ -44,7 +44,15 @@ export default function ProjectDetailPage({ params }: PageProps) {
     }
   };
 
-  if (!project) {
+  if (isError) {
+    return (
+      <div className="p-6">
+        <p className="text-muted-foreground">Failed to load project.</p>
+      </div>
+    );
+  }
+
+  if (isPending || !project) {
     return (
       <div className="p-6">
         <p className="text-muted-foreground">Loading project...</p>

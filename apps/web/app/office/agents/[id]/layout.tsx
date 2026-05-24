@@ -43,12 +43,20 @@ export default function AgentDetailLayout({ children, params }: AgentDetailLayou
   const { id } = use(params);
   const pathname = usePathname();
   const workspaceId = useAppStore((s) => s.workspaces.activeId);
-  const { data: agents = [] } = useQuery({
+  const { data: agents = [], isPending } = useQuery({
     ...officeQueryOptions.agents(workspaceId ?? ""),
     enabled: !!workspaceId,
   });
   const agent = agents.find((a) => a.id === id);
   const activeSlug = activeSlugFromPath(pathname, id);
+
+  if (isPending) {
+    return (
+      <div className="p-6">
+        <p className="text-muted-foreground">Loading...</p>
+      </div>
+    );
+  }
 
   if (!agent) {
     return (
