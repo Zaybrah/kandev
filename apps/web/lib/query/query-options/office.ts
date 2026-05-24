@@ -181,7 +181,7 @@ export const officeQueryOptions = {
   /** Routines for a workspace. */
   routines: (wsId: string) =>
     queryOptions({
-      queryKey: ["office", wsId, "routines"] as const,
+      queryKey: qk.office.routines(wsId),
       queryFn: () => listRoutines(wsId).then((r) => r.routines ?? []),
       enabled: !!wsId,
       staleTime: 30_000,

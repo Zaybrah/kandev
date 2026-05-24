@@ -8,6 +8,7 @@ import { IconPlus } from "@tabler/icons-react";
 import { toast } from "sonner";
 import { useAppStore } from "@/components/state-provider";
 import { officeQueryOptions } from "@/lib/query/query-options/office";
+import { qk } from "@/lib/query/keys";
 import {
   createRoutine,
   updateRoutine,
@@ -129,7 +130,7 @@ function useRoutinesData(workspaceId: string | null) {
 
   const fetchRoutines = useCallback(async () => {
     if (!workspaceId) return;
-    await qc.invalidateQueries({ queryKey: ["office", workspaceId, "routines"] });
+    await qc.invalidateQueries({ queryKey: qk.office.routines(workspaceId ?? "") });
   }, [workspaceId, qc]);
 
   const fetchRuns = useCallback(async () => {

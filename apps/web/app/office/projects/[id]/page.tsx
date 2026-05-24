@@ -26,7 +26,11 @@ export default function ProjectDetailPage({ params }: PageProps) {
   const router = useRouter();
   const workspaceId = useAppStore((s) => s.workspaces.activeId);
   const qc = useQueryClient();
-  const { data: project, isPending, isError } = useQuery({
+  const {
+    data: project,
+    isPending,
+    isError,
+  } = useQuery({
     ...officeQueryOptions.projects(workspaceId ?? ""),
     enabled: !!workspaceId,
     select: (projects) => projects.find((p) => p.id === id),

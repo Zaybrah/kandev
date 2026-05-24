@@ -95,6 +95,7 @@ export const qk = {
     runs: (wsId: string) => ["office", wsId, "runs"] as const,
     approvals: (wsId: string) => ["office", wsId, "approvals"] as const,
     activity: (wsId: string) => ["office", wsId, "activity"] as const,
+    routines: (wsId: string) => ["office", wsId, "routines"] as const,
   },
 
   // -------------------------------------------------------------------------

@@ -373,7 +373,7 @@ function registerMiscHandlers(
     if (!isCurrentWorkspace(p)) return;
     const wsId = (p.workspace_id as string | undefined) ?? getWsId();
     if (!wsId) return;
-    void qc.invalidateQueries({ queryKey: ["office", wsId, "routines"] as const });
+    void qc.invalidateQueries({ queryKey: qk.office.routines(wsId) });
     void qc.invalidateQueries({ queryKey: qk.office.activity(wsId) });
   });
 
