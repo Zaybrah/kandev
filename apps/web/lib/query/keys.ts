@@ -80,8 +80,35 @@ export const qk = {
   // -------------------------------------------------------------------------
   github: {
     prefix: (wsId: string) => ["github", wsId] as const,
+    /** Workspace-scoped task PR associations (Record<taskId, TaskPR[]>). */
     prs: (wsId: string) => ["github", wsId, "prs"] as const,
+    /** PR review feedback (reviews, comments, checks) for a single PR. */
     review: (prId: string) => ["github", "prs", prId, "review"] as const,
+    /** GitHub auth/connection status. */
+    status: () => ["github", "status"] as const,
+    /** PR watches list (global, not workspace-scoped). */
+    prWatches: () => ["github", "pr-watches"] as const,
+    /** Review watches, optionally scoped to a workspace. */
+    reviewWatches: (wsId?: string) =>
+      wsId !== undefined
+        ? (["github", "review-watches", wsId] as const)
+        : (["github", "review-watches"] as const),
+    /** Issue watches, optionally scoped to a workspace. */
+    issueWatches: (wsId?: string) =>
+      wsId !== undefined
+        ? (["github", "issue-watches", wsId] as const)
+        : (["github", "issue-watches"] as const),
+    /** Action presets for a workspace. */
+    actionPresets: (wsId: string) => ["github", wsId, "action-presets"] as const,
+    /** PR feedback cache (reviews, comments, checks) — stale-while-revalidate. */
+    prFeedback: (owner: string, repo: string, prNumber: number) =>
+      ["github", "pr-feedback", owner, repo, prNumber] as const,
+    /** PR diff files via WS. */
+    prFiles: (owner: string, repo: string, prNumber: number, syncedAt?: string | null) =>
+      ["github", "pr-files", owner, repo, prNumber, syncedAt ?? ""] as const,
+    /** PR commits via WS. */
+    prCommits: (owner: string, repo: string, prNumber: number) =>
+      ["github", "pr-commits", owner, repo, prNumber] as const,
   },
 
   // -------------------------------------------------------------------------
