@@ -57,8 +57,7 @@ export const settingsQueryOptions = {
   agentDiscovery: () =>
     queryOptions({
       queryKey: qk.settings.agentDiscovery(),
-      queryFn: () =>
-        listAgentDiscovery({ cache: "no-store" }).then((r) => r.agents ?? []),
+      queryFn: () => listAgentDiscovery({ cache: "no-store" }).then((r) => r.agents ?? []),
       staleTime: 5 * 60_000,
     }),
 
@@ -137,8 +136,7 @@ export const settingsQueryOptions = {
   remoteAuthSpecs: () =>
     queryOptions({
       queryKey: qk.settings.remoteAuthSpecs(),
-      queryFn: () =>
-        listRemoteCredentials({ cache: "no-store" }).then((r) => r.auth_specs ?? []),
+      queryFn: () => listRemoteCredentials({ cache: "no-store" }).then((r) => r.auth_specs ?? []),
       staleTime: Infinity,
     }),
 };

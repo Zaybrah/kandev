@@ -65,10 +65,7 @@ function upsertHealthRow(
 // Run attempts cache updater (upsert by seq)
 // ---------------------------------------------------------------------------
 
-function upsertRunAttempt(
-  prev: RouteAttempt[] | undefined,
-  attempt: RouteAttempt,
-): RouteAttempt[] {
+function upsertRunAttempt(prev: RouteAttempt[] | undefined, attempt: RouteAttempt): RouteAttempt[] {
   const list = prev ?? [];
   const idx = list.findIndex((a) => a.seq === attempt.seq);
   if (idx >= 0) {
@@ -246,16 +243,20 @@ function registerTaskHandlers(
   const invalidateDashboard = (wsId: string) =>
     void qc.invalidateQueries({ queryKey: qk.office.dashboard(wsId) });
   const patchTasksKey = (wsId: string, taskId: string, fields: Partial<OfficeTask>) =>
-    qc.setQueriesData<OfficeTask[]>(
-      { queryKey: qk.office.tasks(wsId) },
-      (prev) => patchTask(prev, taskId, fields),
+    qc.setQueriesData<OfficeTask[]>({ queryKey: qk.office.tasks(wsId) }, (prev) =>
+      patchTask(prev, taskId, fields),
     );
 
-  const deps: TaskHandlerDeps = { ws, qc, isCurrentWorkspace, getWsId, invalidateTasks, invalidateDashboard, patchTasksKey };
-  return [
-    ...registerTaskMutationHandlers(deps),
-    ...registerTaskNotificationHandlers(deps),
-  ];
+  const deps: TaskHandlerDeps = {
+    ws,
+    qc,
+    isCurrentWorkspace,
+    getWsId,
+    invalidateTasks,
+    invalidateDashboard,
+    patchTasksKey,
+  };
+  return [...registerTaskMutationHandlers(deps), ...registerTaskNotificationHandlers(deps)];
 }
 
 // ---------------------------------------------------------------------------
@@ -403,9 +404,8 @@ function registerRoutingHandlers(
     if (!wsId) return;
     const row = extractProviderHealth(p);
     if (!row) return;
-    qc.setQueryData<ProviderHealth[]>(
-      qk.office.providerHealth(wsId),
-      (prev) => upsertHealthRow(prev, row),
+    qc.setQueryData<ProviderHealth[]>(qk.office.providerHealth(wsId), (prev) =>
+      upsertHealthRow(prev, row),
     );
   });
 
@@ -415,9 +415,8 @@ function registerRoutingHandlers(
     const runId = p.run_id as string | undefined;
     const attempt = p.attempt as RouteAttempt | undefined;
     if (!runId || !attempt) return;
-    qc.setQueryData<RouteAttempt[]>(
-      ["office", "runs", runId, "attempts"] as const,
-      (prev) => upsertRunAttempt(prev, attempt),
+    qc.setQueryData<RouteAttempt[]>(["office", "runs", runId, "attempts"] as const, (prev) =>
+      upsertRunAttempt(prev, attempt),
     );
   });
 

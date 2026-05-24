@@ -38,7 +38,12 @@ export function usePRDiff(
     ? qk.github.prFiles(owner!, repo!, prNumber!, refreshKey)
     : (["github", "pr-files", null] as const);
 
-  const { data: files = [], isLoading, error, refetch } = useQuery({
+  const {
+    data: files = [],
+    isLoading,
+    error,
+    refetch,
+  } = useQuery({
     queryKey: cacheKey,
     queryFn: () => fetchPRDiffFiles(owner!, repo!, prNumber!),
     enabled: hasParams,

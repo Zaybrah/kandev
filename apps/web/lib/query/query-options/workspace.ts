@@ -17,9 +17,7 @@ export type BranchQuerySource =
 
 /** Stable cache key for a BranchQuerySource (matches the old Zustand cacheKeyFor). */
 export function branchCacheKey(source: BranchQuerySource): string {
-  return source.kind === "id"
-    ? source.repositoryId
-    : `path::${source.workspaceId}::${source.path}`;
+  return source.kind === "id" ? source.repositoryId : `path::${source.workspaceId}::${source.path}`;
 }
 
 /**

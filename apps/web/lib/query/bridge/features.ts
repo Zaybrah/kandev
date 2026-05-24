@@ -17,10 +17,7 @@ import type { WebSocketClient } from "@/lib/ws/client";
  *
  * For now this is intentionally a no-op registrar.
  */
-export function registerFeaturesBridge(
-  _ws: WebSocketClient,
-  _qc: QueryClient,
-): () => void {
+export function registerFeaturesBridge(_ws: WebSocketClient, _qc: QueryClient): () => void {
   // No WS handler to register — features are static for the lifetime of
   // a browser session and are seeded from SSR prefetch / initial fetch.
   return () => {

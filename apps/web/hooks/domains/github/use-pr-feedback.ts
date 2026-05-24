@@ -7,14 +7,13 @@ import { githubQueryOptions } from "@/lib/query/query-options/github";
  * Fetch live PR feedback (reviews, comments, checks) from GitHub.
  * Uses TanStack Query for caching and dedup; callers call `refresh()` imperatively.
  */
-export function usePRFeedback(
-  owner: string | null,
-  repo: string | null,
-  prNumber: number | null,
-) {
-  const { data: feedback, isLoading, error, refetch } = useQuery(
-    githubQueryOptions.prFeedback(owner, repo, prNumber),
-  );
+export function usePRFeedback(owner: string | null, repo: string | null, prNumber: number | null) {
+  const {
+    data: feedback,
+    isLoading,
+    error,
+    refetch,
+  } = useQuery(githubQueryOptions.prFeedback(owner, repo, prNumber));
 
   function refresh() {
     void refetch();

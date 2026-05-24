@@ -15,10 +15,7 @@ import type { WebSocketClient } from "@/lib/ws/client";
  *
  * Returns a cleanup function (no-op until push events exist).
  */
-export function registerAutomationsBridge(
-  _ws: WebSocketClient,
-  _qc: QueryClient,
-): () => void {
+export function registerAutomationsBridge(_ws: WebSocketClient, _qc: QueryClient): () => void {
   // No push handlers needed — mutations in the hooks invalidate the
   // affected query keys directly via qc.invalidateQueries().
   return () => {

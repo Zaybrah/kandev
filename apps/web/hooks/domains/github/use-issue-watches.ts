@@ -10,7 +10,11 @@ import {
 } from "@/lib/api/domains/github-api";
 import { githubQueryOptions } from "@/lib/query/query-options/github";
 import { qk } from "@/lib/query/keys";
-import type { IssueWatch, CreateIssueWatchRequest, UpdateIssueWatchRequest } from "@/lib/types/github";
+import type {
+  IssueWatch,
+  CreateIssueWatchRequest,
+  UpdateIssueWatchRequest,
+} from "@/lib/types/github";
 
 // useIssueWatches has three modes:
 //   - workspaceId: string         → fetch watches scoped to one workspace
@@ -18,13 +22,12 @@ import type { IssueWatch, CreateIssueWatchRequest, UpdateIssueWatchRequest } fro
 //   - workspaceId: null           → don't fetch (caller hasn't resolved a workspace yet)
 export function useIssueWatches(workspaceId?: string | null) {
   const qc = useQueryClient();
-  const cacheKey = workspaceId !== null
-    ? qk.github.issueWatches(workspaceId ?? undefined)
-    : qk.github.issueWatches();
+  const cacheKey =
+    workspaceId !== null
+      ? qk.github.issueWatches(workspaceId ?? undefined)
+      : qk.github.issueWatches();
 
-  const { data, isLoading, isSuccess } = useQuery(
-    githubQueryOptions.issueWatches(workspaceId),
-  );
+  const { data, isLoading, isSuccess } = useQuery(githubQueryOptions.issueWatches(workspaceId));
 
   const createMutation = useMutation({
     mutationFn: (req: CreateIssueWatchRequest) => createIssueWatch(req),

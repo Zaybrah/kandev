@@ -45,7 +45,11 @@ export function useUpdateNotificationProvider() {
     onSuccess: (updated) => {
       qc.setQueryData(
         qk.settings.notificationProviders(),
-        (prev: { items: NotificationProvider[]; events: string[]; appriseAvailable: boolean } | undefined) => {
+        (
+          prev:
+            | { items: NotificationProvider[]; events: string[]; appriseAvailable: boolean }
+            | undefined,
+        ) => {
           if (!prev) return prev;
           return {
             ...prev,
@@ -64,7 +68,11 @@ export function useDeleteNotificationProvider() {
     onSuccess: (_result, id) => {
       qc.setQueryData(
         qk.settings.notificationProviders(),
-        (prev: { items: NotificationProvider[]; events: string[]; appriseAvailable: boolean } | undefined) => {
+        (
+          prev:
+            | { items: NotificationProvider[]; events: string[]; appriseAvailable: boolean }
+            | undefined,
+        ) => {
           if (!prev) return prev;
           return { ...prev, items: prev.items.filter((p) => p.id !== id) };
         },

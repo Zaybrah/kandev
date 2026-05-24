@@ -52,10 +52,7 @@ function upsertCreatedTask(
  * Patches an edited task's dialog-editable fields (title, description,
  * repositoryId) in the TQ multi cache.
  */
-function patchEditedTask(
-  queryClient: ReturnType<typeof useQueryClient>,
-  task: BackendTask,
-): void {
+function patchEditedTask(queryClient: ReturnType<typeof useQueryClient>, task: BackendTask): void {
   const repoId = task.repositories?.[0]?.repository_id ?? undefined;
   const wfId = task.workflow_id;
 

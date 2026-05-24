@@ -88,7 +88,10 @@ function InboxToolbar({
   );
 }
 
-export function InboxPageClient({ initialItems: _initialItems, initialCount: _initialCount }: InboxPageClientProps) {
+export function InboxPageClient({
+  initialItems: _initialItems,
+  initialCount: _initialCount,
+}: InboxPageClientProps) {
   const workspaceId = useAppStore((s) => s.workspaces.activeId);
   const qc = useQueryClient();
   const [tab, setTab] = useState<TabValue>("mine");

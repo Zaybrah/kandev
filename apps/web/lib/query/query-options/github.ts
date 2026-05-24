@@ -57,9 +57,9 @@ export const githubQueryOptions = {
    */
   reviewWatches: (wsId?: string | null) =>
     queryOptions({
-      queryKey: wsId !== null ? qk.github.reviewWatches(wsId ?? undefined) : qk.github.reviewWatches(),
-      queryFn: () =>
-        listReviewWatches(wsId ?? undefined, { cache: "no-store" }),
+      queryKey:
+        wsId !== null ? qk.github.reviewWatches(wsId ?? undefined) : qk.github.reviewWatches(),
+      queryFn: () => listReviewWatches(wsId ?? undefined, { cache: "no-store" }),
       enabled: wsId !== null,
       staleTime: 30_000,
     }),
@@ -70,9 +70,9 @@ export const githubQueryOptions = {
    */
   issueWatches: (wsId?: string | null) =>
     queryOptions({
-      queryKey: wsId !== null ? qk.github.issueWatches(wsId ?? undefined) : qk.github.issueWatches(),
-      queryFn: () =>
-        listIssueWatches(wsId ?? undefined, { cache: "no-store" }),
+      queryKey:
+        wsId !== null ? qk.github.issueWatches(wsId ?? undefined) : qk.github.issueWatches(),
+      queryFn: () => listIssueWatches(wsId ?? undefined, { cache: "no-store" }),
       enabled: wsId !== null,
       staleTime: 30_000,
     }),
@@ -80,7 +80,9 @@ export const githubQueryOptions = {
   /** Action presets (quick-launch prompts) for a workspace. */
   actionPresets: (wsId: string | null) =>
     queryOptions({
-      queryKey: wsId ? qk.github.actionPresets(wsId) : (["github", "action-presets", null] as const),
+      queryKey: wsId
+        ? qk.github.actionPresets(wsId)
+        : (["github", "action-presets", null] as const),
       queryFn: () => fetchGitHubActionPresets(wsId!, { cache: "no-store" }),
       enabled: !!wsId,
       staleTime: 60_000,
@@ -90,11 +92,7 @@ export const githubQueryOptions = {
    * PR feedback (reviews, comments, checks) — stale-while-revalidate.
    * Fetched on demand (popover open or PR updated_at change).
    */
-  prFeedback: (
-    owner: string | null,
-    repo: string | null,
-    prNumber: number | null,
-  ) =>
+  prFeedback: (owner: string | null, repo: string | null, prNumber: number | null) =>
     queryOptions({
       queryKey:
         owner && repo && prNumber

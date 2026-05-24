@@ -261,9 +261,7 @@ describe("registerOfficeBridge — select-pattern (sort/group derivation)", () =
 
     // Simulate sort/group happening in select (outside the cache).
     const raw = qc.getQueryData<OfficeTask[]>(qk.office.tasks(WS_ID)) ?? [];
-    const sortedByPriority = [...raw].sort((a, b) =>
-      a.priority < b.priority ? -1 : 1,
-    );
+    const sortedByPriority = [...raw].sort((a, b) => (a.priority < b.priority ? -1 : 1));
     expect(sortedByPriority[0]?.id).toBe("t2"); // high < low alphabetically
     // Cache itself remains unsorted — sort is view-only.
     const cacheAfter = qc.getQueryData<OfficeTask[]>(qk.office.tasks(WS_ID));

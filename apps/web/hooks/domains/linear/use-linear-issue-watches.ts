@@ -52,15 +52,8 @@ export function useLinearIssueWatches(workspaceId?: string | null) {
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({
-      id,
-      ws,
-      req,
-    }: {
-      id: string;
-      ws: string;
-      req: UpdateLinearIssueWatchInput;
-    }) => updateLinearIssueWatch(ws, id, req),
+    mutationFn: ({ id, ws, req }: { id: string; ws: string; req: UpdateLinearIssueWatchInput }) =>
+      updateLinearIssueWatch(ws, id, req),
     onSuccess: () => invalidate(),
   });
 

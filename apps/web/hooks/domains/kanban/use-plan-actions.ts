@@ -74,7 +74,11 @@ function useNextWorkflowStep(taskId: string | null) {
   const isMoving = moveFromSessionId != null && activeSessionId === moveFromSessionId;
 
   const sortedSteps = useMemo(
-    () => [...steps].sort((a: KanbanState["steps"][number], b: KanbanState["steps"][number]) => a.position - b.position),
+    () =>
+      [...steps].sort(
+        (a: KanbanState["steps"][number], b: KanbanState["steps"][number]) =>
+          a.position - b.position,
+      ),
     [steps],
   );
 

@@ -32,9 +32,7 @@ export function useRepository(repositoryId: string | null): Repository | null {
     })),
     combine: (results): Repository | null => {
       for (const result of results) {
-        const match = result.data?.repositories?.find(
-          (r: Repository) => r.id === repositoryId,
-        );
+        const match = result.data?.repositories?.find((r: Repository) => r.id === repositoryId);
         if (match) return match;
       }
       return null;

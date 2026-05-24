@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach } from "vitest";
 import { createTestQueryClient } from "@/test-utils/render-with-query";
 import {
   registerSessionRuntimeStreamsBridge,
@@ -55,6 +55,12 @@ function getSnapshot(key: string): string[] {
 }
 
 // ---------------------------------------------------------------------------
+// WS event name constants
+// ---------------------------------------------------------------------------
+
+const SHELL_OUTPUT_EVENT = "session.shell.output";
+
+// ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
 
@@ -76,7 +82,7 @@ describe("session-runtime-streams bridge", () => {
   });
 
   it("appends shell output to the shell ring buffer", () => {
-    ws.emit("session.shell.output", {
+    ws.emit(SHELL_OUTPUT_EVENT, {
       session_id: "sess-1",
       type: "output",
       data: "hello\n",
@@ -86,7 +92,7 @@ describe("session-runtime-streams bridge", () => {
 
   it("clears shell ring buffer on exit event", () => {
     appendToRing(shellRingKey("sess-1"), "old data");
-    ws.emit("session.shell.output", {
+    ws.emit(SHELL_OUTPUT_EVENT, {
       session_id: "sess-1",
       type: "exit",
     });
@@ -94,7 +100,7 @@ describe("session-runtime-streams bridge", () => {
   });
 
   it("ignores shell output events without session_id", () => {
-    ws.emit("session.shell.output", { type: "output", data: "oops" });
+    ws.emit(SHELL_OUTPUT_EVENT, { type: "output", data: "oops" });
     // No-op; shouldn't throw
   });
 
@@ -143,7 +149,7 @@ describe("session-runtime-streams bridge", () => {
 
     const N = 1000;
     for (let i = 0; i < N; i++) {
-      ws.emit("session.shell.output", {
+      ws.emit(SHELL_OUTPUT_EVENT, {
         session_id: sessionId,
         type: "output",
         data: `line ${i}\n`,
@@ -159,7 +165,7 @@ describe("session-runtime-streams bridge", () => {
 
   it("cleanup removes handlers so subsequent events are ignored", () => {
     cleanup();
-    ws.emit("session.shell.output", {
+    ws.emit(SHELL_OUTPUT_EVENT, {
       session_id: "after-cleanup",
       type: "output",
       data: "should not appear",

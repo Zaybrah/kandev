@@ -19,10 +19,7 @@ import type { WebSocketClient } from "@/lib/ws/client";
  *   qc.invalidateQueries({ queryKey: qk.jira.issueWatches() })
  * from inside this function and wire it into registerQueryBridge.
  */
-export function registerJiraBridge(
-  _ws: WebSocketClient,
-  _qc: QueryClient,
-): () => void {
+export function registerJiraBridge(_ws: WebSocketClient, _qc: QueryClient): () => void {
   // No WS events for Jira — REST-only integration.
   // Mutations invalidate keys directly via onSettled.
   return () => {

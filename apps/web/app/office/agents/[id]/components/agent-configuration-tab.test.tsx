@@ -69,14 +69,10 @@ const PROFILE_OPTION = {
 
 describe("AgentConfigurationTab", () => {
   it("renders the CLI configuration card with the linked profile summary", () => {
-    renderWithProfiles(
-      <AgentConfigurationTab agent={baseAgent} />,
-      [PROFILE_OPTION],
-      {
-        workspaces: { activeId: "ws-1", items: [] },
-        office: { ...defaultOfficeState.office, agentProfiles: [baseAgent] },
-      },
-    );
+    renderWithProfiles(<AgentConfigurationTab agent={baseAgent} />, [PROFILE_OPTION], {
+      workspaces: { activeId: "ws-1", items: [] },
+      office: { ...defaultOfficeState.office, agentProfiles: [baseAgent] },
+    });
 
     expect(screen.getByText("CLI Configuration")).toBeTruthy();
     expect(screen.getByText(CLAUDE_AGENT_ID)).toBeTruthy();
@@ -89,28 +85,20 @@ describe("AgentConfigurationTab", () => {
       agentId: CLAUDE_AGENT_ID,
       agentDisplayName: "Claude",
     };
-    renderWithProfiles(
-      <AgentConfigurationTab agent={orphan} />,
-      [PROFILE_OPTION],
-      {
-        workspaces: { activeId: "ws-1", items: [] },
-        office: { ...defaultOfficeState.office, agentProfiles: [orphan] },
-      },
-    );
+    renderWithProfiles(<AgentConfigurationTab agent={orphan} />, [PROFILE_OPTION], {
+      workspaces: { activeId: "ws-1", items: [] },
+      office: { ...defaultOfficeState.office, agentProfiles: [orphan] },
+    });
 
     expect(screen.queryByText(/no cli profile selected/i)).toBeNull();
     expect(screen.getByText("Claude")).toBeTruthy();
   });
 
   it("shows create-agent capability for CEO agents", () => {
-    renderWithProfiles(
-      <AgentConfigurationTab agent={baseAgent} />,
-      [PROFILE_OPTION],
-      {
-        workspaces: { activeId: "ws-1", items: [] },
-        office: { ...defaultOfficeState.office, agentProfiles: [baseAgent] },
-      },
-    );
+    renderWithProfiles(<AgentConfigurationTab agent={baseAgent} />, [PROFILE_OPTION], {
+      workspaces: { activeId: "ws-1", items: [] },
+      office: { ...defaultOfficeState.office, agentProfiles: [baseAgent] },
+    });
 
     expect(screen.getByTestId("agent-capability-preview").textContent).toContain("Create agent");
   });
@@ -122,14 +110,10 @@ describe("AgentConfigurationTab", () => {
       name: "Worker",
       role: "worker" as const,
     };
-    renderWithProfiles(
-      <AgentConfigurationTab agent={worker} />,
-      [PROFILE_OPTION],
-      {
-        workspaces: { activeId: "ws-1", items: [] },
-        office: { ...defaultOfficeState.office, agentProfiles: [worker] },
-      },
-    );
+    renderWithProfiles(<AgentConfigurationTab agent={worker} />, [PROFILE_OPTION], {
+      workspaces: { activeId: "ws-1", items: [] },
+      office: { ...defaultOfficeState.office, agentProfiles: [worker] },
+    });
 
     expect(screen.getByTestId("agent-capability-preview").textContent).not.toContain(
       "Create agent",

@@ -114,7 +114,6 @@ function registerTerminalStreamHandlers(ws: WebSocketClient): () => void {
  */
 export function registerSessionRuntimeStreamsBridge(
   ws: WebSocketClient,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _qc: QueryClient,
 ): () => void {
   const unsubs = [

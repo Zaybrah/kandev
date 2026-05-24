@@ -20,9 +20,7 @@ export function getPrimaryTaskPR(prs: TaskPR[] | undefined): TaskPR | null {
  * accept the legacy bare-TaskPR shape too in case an older backend is
  * still running. Empty / null / unknown shapes return an empty array.
  */
-function normalizeSyncResponse(
-  result: { prs?: TaskPR[] } | TaskPR | null | undefined,
-): TaskPR[] {
+function normalizeSyncResponse(result: { prs?: TaskPR[] } | TaskPR | null | undefined): TaskPR[] {
   if (!result) return [];
   const envelope = result as { prs?: TaskPR[] };
   if (Array.isArray(envelope.prs)) return envelope.prs;
@@ -46,9 +44,7 @@ export function useWorkspacePRs(workspaceId: string | null) {
 export function useTaskPR(taskId: string | null) {
   // Read from the Zustand slice — the WS handler and the TQ bridge both write
   // here, so we always have the freshest value from either path.
-  const prs = useAppStore((state) =>
-    taskId ? (state.taskPRs.byTaskId[taskId] ?? null) : null,
-  );
+  const prs = useAppStore((state) => (taskId ? (state.taskPRs.byTaskId[taskId] ?? null) : null));
   const pr = getPrimaryTaskPR(prs ?? undefined);
   const setTaskPR = useAppStore((state) => state.setTaskPR);
   const retryRef = useRef(0);

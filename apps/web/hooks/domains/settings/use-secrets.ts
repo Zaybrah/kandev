@@ -8,7 +8,11 @@ import {
   updateSecret as updateSecretApi,
   deleteSecret,
 } from "@/lib/api/domains/secrets-api";
-import type { SecretListItem, CreateSecretRequest, UpdateSecretRequest } from "@/lib/types/http-secrets";
+import type {
+  SecretListItem,
+  CreateSecretRequest,
+  UpdateSecretRequest,
+} from "@/lib/types/http-secrets";
 
 export function useSecrets() {
   const query = useQuery(settingsQueryOptions.secrets());

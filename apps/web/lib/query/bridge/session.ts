@@ -70,7 +70,7 @@ function buildMessageFromPayload(payload: Record<string, unknown>): Message {
     author_id: payload.author_id as string | undefined,
     content: payload.content as string,
     raw_content: payload.raw_content as string | undefined,
-    type: ((payload.type as MessageType) || "message"),
+    type: (payload.type as MessageType) || "message",
     metadata: payload.metadata as Record<string, unknown> | undefined,
     requests_input: payload.requests_input as boolean | undefined,
     created_at: payload.created_at as string,
@@ -245,7 +245,9 @@ function registerTaskPlanHandlers(ws: WebSocketClient, qc: QueryClient): Array<(
   const unsubRevisionCreated = ws.on("task.plan.revision.created", (message) => {
     const p = message.payload;
     // Revisions are managed in a separate query key; invalidate to trigger refetch
-    void qc.invalidateQueries({ queryKey: ["session", "plans", p.task_id as string, "revisions"] as const });
+    void qc.invalidateQueries({
+      queryKey: ["session", "plans", p.task_id as string, "revisions"] as const,
+    });
     invalidatePlan(p.task_id as string);
   });
 

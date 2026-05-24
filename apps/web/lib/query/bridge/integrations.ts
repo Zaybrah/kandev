@@ -25,10 +25,7 @@ import type { WebSocketClient } from "@/lib/ws/client";
  *   qc.invalidateQueries({ queryKey: qk.integrations.health(kind) })
  * from inside this function and wire it into registerQueryBridge.
  */
-export function registerIntegrationsBridge(
-  _ws: WebSocketClient,
-  _qc: QueryClient,
-): () => void {
+export function registerIntegrationsBridge(_ws: WebSocketClient, _qc: QueryClient): () => void {
   // No WS events for integration availability or enabled state.
   // Availability is managed by HTTP polling (refetchInterval: 90_000).
   // Enabled is managed by localStorage + browser storage events.

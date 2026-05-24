@@ -64,13 +64,17 @@ export function renderWithQueryClient(
  * Options for renderHookWithQueryClient.
  * `client` defaults to a test-friendly QueryClient with retry and gcTime disabled.
  */
-export interface RenderHookWithQueryOptions<TProps>
-  extends Omit<RenderHookOptions<TProps>, "wrapper"> {
+export interface RenderHookWithQueryOptions<TProps> extends Omit<
+  RenderHookOptions<TProps>,
+  "wrapper"
+> {
   client?: QueryClient;
 }
 
-export interface RenderHookWithQueryResult<TResult, TProps>
-  extends RenderHookResult<TResult, TProps> {
+export interface RenderHookWithQueryResult<TResult, TProps> extends RenderHookResult<
+  TResult,
+  TProps
+> {
   client: QueryClient;
 }
 

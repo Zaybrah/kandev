@@ -13,6 +13,12 @@ vi.mock("@/hooks/domains/session/use-cumulative-diff", () => ({
 }));
 
 // ---------------------------------------------------------------------------
+// WS event name constants
+// ---------------------------------------------------------------------------
+
+const GIT_EVENT = "session.git.event";
+
+// ---------------------------------------------------------------------------
 // Fake WebSocket client
 // ---------------------------------------------------------------------------
 type Handler = (message: { payload: Record<string, unknown>; timestamp?: string }) => void;
@@ -38,26 +44,32 @@ function makeFakeWs() {
 }
 
 // ---------------------------------------------------------------------------
-// Tests
+// Shared setup
 // ---------------------------------------------------------------------------
 
-describe("session-runtime bridge", () => {
-  let ws: ReturnType<typeof makeFakeWs>;
-  let qc: ReturnType<typeof createTestQueryClient>;
-  let getEnvKey: (sid: string) => string;
-  let cleanup: () => void;
+type TestContext = {
+  ws: ReturnType<typeof makeFakeWs>;
+  qc: ReturnType<typeof createTestQueryClient>;
+  cleanup: () => void;
+};
 
+function makeContext(): TestContext {
+  const ws = makeFakeWs();
+  const qc = createTestQueryClient();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const cleanup = registerSessionRuntimeBridge(ws as any, qc, (sid) => sid);
+  return { ws, qc, cleanup };
+}
+
+// ---------------------------------------------------------------------------
+// Git event tests
+// ---------------------------------------------------------------------------
+
+describe("session-runtime bridge — git events", () => {
+  let ctx: TestContext;
   beforeEach(() => {
-    ws = makeFakeWs();
-    qc = createTestQueryClient();
-    getEnvKey = (sid: string) => sid; // identity resolver for tests
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    cleanup = registerSessionRuntimeBridge(ws as any, qc, getEnvKey);
+    ctx = makeContext();
   });
-
-  // -------------------------------------------------------------------------
-  // Git status
-  // -------------------------------------------------------------------------
 
   it("stores git status update into the git cache key", () => {
     const gitStatus = {
@@ -74,26 +86,21 @@ describe("session-runtime bridge", () => {
       timestamp: "2024-01-01T00:00:00Z",
     };
 
-    ws.emit("session.git.event", {
-      session_id: "sess-1",
-      type: "status_update",
-      status: gitStatus,
-    });
+    ctx.ws.emit(GIT_EVENT, { session_id: "sess-1", type: "status_update", status: gitStatus });
 
-    const data = qc.getQueryData<GitStatusData>(qk.session.git("sess-1"));
+    const data = ctx.qc.getQueryData<GitStatusData>(qk.session.git("sess-1"));
     expect(data?.byEnvironmentId?.branch).toBe("main");
     expect(data?.byEnvironmentRepo[""]?.branch).toBe("main");
   });
 
   it("resolves envKey via getEnvKey resolver for git events", () => {
-    // Use a fresh WS + QC so the identity resolver from beforeEach doesn't interfere
     const ws2 = makeFakeWs();
     const qc2 = createTestQueryClient();
     const customResolver = (sid: string) => `env-${sid}`;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const localCleanup = registerSessionRuntimeBridge(ws2 as any, qc2, customResolver);
 
-    ws2.emit("session.git.event", {
+    ws2.emit(GIT_EVENT, {
       session_id: "sess-2",
       type: "status_update",
       status: {
@@ -131,30 +138,32 @@ describe("session-runtime bridge", () => {
       created_at: "2024-01-01T00:00:01Z",
     };
 
-    ws.emit("session.git.event", {
-      session_id: "sess-3",
-      type: "commit_created",
-      commit,
-    });
+    ctx.ws.emit(GIT_EVENT, { session_id: "sess-3", type: "commit_created", commit });
 
-    const commits = qc.getQueryData(qk.session.commits("sess-3"));
+    const commits = ctx.qc.getQueryData(qk.session.commits("sess-3"));
     expect(Array.isArray(commits)).toBe(true);
     expect((commits as unknown[]).length).toBe(1);
   });
 
   it("clears commits on commits_reset event", () => {
-    qc.setQueryData(qk.session.commits("sess-4"), [{ id: "c1" }]);
-    ws.emit("session.git.event", { session_id: "sess-4", type: "commits_reset" });
-    // removeQueries should clear the key
-    expect(qc.getQueryData(qk.session.commits("sess-4"))).toBeUndefined();
+    ctx.qc.setQueryData(qk.session.commits("sess-4"), [{ id: "c1" }]);
+    ctx.ws.emit(GIT_EVENT, { session_id: "sess-4", type: "commits_reset" });
+    expect(ctx.qc.getQueryData(qk.session.commits("sess-4"))).toBeUndefined();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Session data event tests
+// ---------------------------------------------------------------------------
+
+describe("session-runtime bridge — session data events", () => {
+  let ctx: TestContext;
+  beforeEach(() => {
+    ctx = makeContext();
   });
 
-  // -------------------------------------------------------------------------
-  // Todos
-  // -------------------------------------------------------------------------
-
   it("stores todos in the TQ cache", () => {
-    ws.emit("session.todos_updated", {
+    ctx.ws.emit("session.todos_updated", {
       session_id: "sess-5",
       entries: [
         { description: "write tests", status: "in_progress", priority: "high" },
@@ -162,33 +171,25 @@ describe("session-runtime bridge", () => {
       ],
     });
 
-    const todos = qc.getQueryData<TodoEntry[]>(qk.session.todos("sess-5"));
+    const todos = ctx.qc.getQueryData<TodoEntry[]>(qk.session.todos("sess-5"));
     expect(todos).toHaveLength(2);
     expect(todos?.[0].description).toBe("write tests");
     expect(todos?.[0].status).toBe("in_progress");
   });
 
-  // -------------------------------------------------------------------------
-  // Session mode
-  // -------------------------------------------------------------------------
-
   it("stores session mode change in TQ cache", () => {
-    ws.emit("session.mode_changed", {
+    ctx.ws.emit("session.mode_changed", {
       session_id: "sess-6",
       current_mode_id: "plan",
       available_modes: [{ id: "plan", name: "Plan Mode", description: "Planning" }],
     });
 
-    const mode = qc.getQueryData(["session", "sess-6", "mode"]);
+    const mode = ctx.qc.getQueryData(["session", "sess-6", "mode"]);
     expect(mode).toMatchObject({ currentModeId: "plan" });
   });
 
-  // -------------------------------------------------------------------------
-  // Prompt usage
-  // -------------------------------------------------------------------------
-
   it("stores prompt usage in TQ cache", () => {
-    ws.emit("session.prompt_usage", {
+    ctx.ws.emit("session.prompt_usage", {
       session_id: "sess-7",
       usage: {
         input_tokens: 100,
@@ -199,30 +200,33 @@ describe("session-runtime bridge", () => {
       },
     });
 
-    const usage = qc.getQueryData(["session", "sess-7", "promptUsage"]);
+    const usage = ctx.qc.getQueryData(["session", "sess-7", "promptUsage"]);
     expect(usage).toMatchObject({ inputTokens: 100, outputTokens: 50, totalTokens: 150 });
   });
 
-  // -------------------------------------------------------------------------
-  // Poll mode
-  // -------------------------------------------------------------------------
-
   it("stores valid poll mode in TQ cache", () => {
-    ws.emit("session.poll_mode_changed", { session_id: "sess-8", poll_mode: "fast" });
-    expect(qc.getQueryData(["session", "sess-8", "pollMode"])).toBe("fast");
+    ctx.ws.emit("session.poll_mode_changed", { session_id: "sess-8", poll_mode: "fast" });
+    expect(ctx.qc.getQueryData(["session", "sess-8", "pollMode"])).toBe("fast");
   });
 
   it("ignores invalid poll mode values", () => {
-    ws.emit("session.poll_mode_changed", { session_id: "sess-9", poll_mode: "turbo" });
-    expect(qc.getQueryData(["session", "sess-9", "pollMode"])).toBeUndefined();
+    ctx.ws.emit("session.poll_mode_changed", { session_id: "sess-9", poll_mode: "turbo" });
+    expect(ctx.qc.getQueryData(["session", "sess-9", "pollMode"])).toBeUndefined();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Prepare progress tests
+// ---------------------------------------------------------------------------
+
+describe("session-runtime bridge — prepare progress", () => {
+  let ctx: TestContext;
+  beforeEach(() => {
+    ctx = makeContext();
   });
 
-  // -------------------------------------------------------------------------
-  // Prepare progress
-  // -------------------------------------------------------------------------
-
   it("stores prepare progress steps in TQ cache", () => {
-    ws.emit("executor.prepare.progress", {
+    ctx.ws.emit("executor.prepare.progress", {
       session_id: "sess-10",
       step_index: 0,
       step_name: "Install deps",
@@ -230,31 +234,27 @@ describe("session-runtime bridge", () => {
       status: "running",
     });
 
-    const progress = qc.getQueryData(["session", "sess-10", "prepareProgress"]);
+    const progress = ctx.qc.getQueryData(["session", "sess-10", "prepareProgress"]);
     expect(progress).toMatchObject({ status: "preparing" });
   });
 
   it("stores prepare completed in TQ cache", () => {
-    ws.emit("executor.prepare.completed", {
+    ctx.ws.emit("executor.prepare.completed", {
       session_id: "sess-11",
       success: true,
       duration_ms: 5000,
     });
 
-    const progress = qc.getQueryData(["session", "sess-11", "prepareProgress"]);
+    const progress = ctx.qc.getQueryData(["session", "sess-11", "prepareProgress"]);
     expect(progress).toMatchObject({ status: "completed", durationMs: 5000 });
   });
 
-  // -------------------------------------------------------------------------
-  // Cleanup
-  // -------------------------------------------------------------------------
-
   it("cleanup removes handlers", () => {
-    cleanup();
-    ws.emit("session.todos_updated", {
+    ctx.cleanup();
+    ctx.ws.emit("session.todos_updated", {
       session_id: "after-cleanup",
       entries: [{ description: "should not appear", status: "pending" }],
     });
-    expect(qc.getQueryData(qk.session.todos("after-cleanup"))).toBeUndefined();
+    expect(ctx.qc.getQueryData(qk.session.todos("after-cleanup"))).toBeUndefined();
   });
 });

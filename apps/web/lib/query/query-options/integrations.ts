@@ -77,8 +77,7 @@ export const integrationsQueryOptions = {
       refetchOnReconnect: false,
       enabled: active,
       // Derive the boolean availability from raw config shape.
-      select: (cfg: IntegrationConfigStatus | null): boolean =>
-        !!cfg?.hasSecret && !!cfg?.lastOk,
+      select: (cfg: IntegrationConfigStatus | null): boolean => !!cfg?.hasSecret && !!cfg?.lastOk,
     }),
 
   /**

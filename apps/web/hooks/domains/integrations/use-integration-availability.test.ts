@@ -46,9 +46,9 @@ describe("useIntegrationAuthed", () => {
   });
 
   it("returns true when the config has a secret and lastOk=true", async () => {
-    const fetchFn = vi.fn<[], Promise<IntegrationConfigStatus | null>>().mockResolvedValue(
-      makeConfig(),
-    );
+    const fetchFn = vi
+      .fn<[], Promise<IntegrationConfigStatus | null>>()
+      .mockResolvedValue(makeConfig());
     const { result } = renderHookWithQueryClient(() =>
       useIntegrationAuthed("test-authed", fetchFn),
     );
@@ -58,9 +58,9 @@ describe("useIntegrationAuthed", () => {
 
   it("returns false while the query is loading (no cached data)", () => {
     // Never resolves during this test
-    const fetchFn = vi.fn<[], Promise<IntegrationConfigStatus | null>>().mockReturnValue(
-      new Promise(() => {}),
-    );
+    const fetchFn = vi
+      .fn<[], Promise<IntegrationConfigStatus | null>>()
+      .mockReturnValue(new Promise(() => {}));
     const { result } = renderHookWithQueryClient(() =>
       useIntegrationAuthed("test-loading", fetchFn),
     );
@@ -103,20 +103,16 @@ describe("useIntegrationAuthed", () => {
   });
 
   it("returns false when the config request returns null (204)", async () => {
-    const fetchFn = vi
-      .fn<[], Promise<IntegrationConfigStatus | null>>()
-      .mockResolvedValue(null);
-    const { result } = renderHookWithQueryClient(() =>
-      useIntegrationAuthed("test-null", fetchFn),
-    );
+    const fetchFn = vi.fn<[], Promise<IntegrationConfigStatus | null>>().mockResolvedValue(null);
+    const { result } = renderHookWithQueryClient(() => useIntegrationAuthed("test-null", fetchFn));
     await waitFor(() => expect(fetchFn).toHaveBeenCalled());
     expect(result.current).toBe(false);
   });
 
   it("skips fetching when active=false", async () => {
-    const fetchFn = vi.fn<[], Promise<IntegrationConfigStatus | null>>().mockResolvedValue(
-      makeConfig(),
-    );
+    const fetchFn = vi
+      .fn<[], Promise<IntegrationConfigStatus | null>>()
+      .mockResolvedValue(makeConfig());
     const { result } = renderHookWithQueryClient(() =>
       useIntegrationAuthed("test-inactive", fetchFn, false),
     );
@@ -167,9 +163,9 @@ describe("useIntegrationAvailable", () => {
   });
 
   it("returns true when enabled=true, loaded=true, and auth is healthy", async () => {
-    const fetchFn = vi.fn<[], Promise<IntegrationConfigStatus | null>>().mockResolvedValue(
-      makeConfig(),
-    );
+    const fetchFn = vi
+      .fn<[], Promise<IntegrationConfigStatus | null>>()
+      .mockResolvedValue(makeConfig());
     const useEnabled = vi.fn().mockReturnValue({ enabled: true, loaded: true });
     const { result } = renderHookWithQueryClient(() =>
       useIntegrationAvailable({ kind: "test-avail", useEnabled, fetchConfig: fetchFn }),
@@ -178,9 +174,9 @@ describe("useIntegrationAvailable", () => {
   });
 
   it("returns false when enabled=false even if auth is healthy", async () => {
-    const fetchFn = vi.fn<[], Promise<IntegrationConfigStatus | null>>().mockResolvedValue(
-      makeConfig(),
-    );
+    const fetchFn = vi
+      .fn<[], Promise<IntegrationConfigStatus | null>>()
+      .mockResolvedValue(makeConfig());
     const useEnabled = vi.fn().mockReturnValue({ enabled: false, loaded: true });
     const { result } = renderHookWithQueryClient(() =>
       useIntegrationAvailable({ kind: "test-avail-off", useEnabled, fetchConfig: fetchFn }),
@@ -192,9 +188,9 @@ describe("useIntegrationAvailable", () => {
   });
 
   it("returns false when loaded=false (toggle not yet settled)", async () => {
-    const fetchFn = vi.fn<[], Promise<IntegrationConfigStatus | null>>().mockResolvedValue(
-      makeConfig(),
-    );
+    const fetchFn = vi
+      .fn<[], Promise<IntegrationConfigStatus | null>>()
+      .mockResolvedValue(makeConfig());
     const useEnabled = vi.fn().mockReturnValue({ enabled: true, loaded: false });
     const { result } = renderHookWithQueryClient(() =>
       useIntegrationAvailable({ kind: "test-not-loaded", useEnabled, fetchConfig: fetchFn }),

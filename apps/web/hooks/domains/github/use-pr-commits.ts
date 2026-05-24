@@ -13,10 +13,11 @@ async function fetchPRCommitsList(
 ): Promise<PRCommitInfo[]> {
   const client = getWebSocketClient();
   if (!client) return [];
-  const response = await client.request<{ commits?: PRCommitInfo[] }>(
-    "github.pr_commits.get",
-    { owner, repo, number: prNumber },
-  );
+  const response = await client.request<{ commits?: PRCommitInfo[] }>("github.pr_commits.get", {
+    owner,
+    repo,
+    number: prNumber,
+  });
   return response?.commits ?? [];
 }
 
@@ -36,7 +37,12 @@ export function usePRCommits(
     ? [...qk.github.prCommits(owner!, repo!, prNumber!), refreshKey ?? ""]
     : (["github", "pr-commits", null] as const);
 
-  const { data: commits = [], isLoading, error, refetch } = useQuery({
+  const {
+    data: commits = [],
+    isLoading,
+    error,
+    refetch,
+  } = useQuery({
     queryKey: cacheKey,
     queryFn: () => fetchPRCommitsList(owner!, repo!, prNumber!),
     enabled: hasParams,

@@ -61,10 +61,7 @@ function upsertTaskPR(
  *
  * Returns a cleanup function that removes all registered handlers.
  */
-export function registerGithubBridge(
-  ws: WebSocketClient,
-  queryClient: QueryClient,
-): () => void {
+export function registerGithubBridge(ws: WebSocketClient, queryClient: QueryClient): () => void {
   // github.task_pr.updated — push into the workspace PR map.
   // The PR contains task_id but not workspace_id, so we use qk.github.prs("all")
   // as a global aggregation key, then individual workspace caches are updated
@@ -87,13 +84,10 @@ export function registerGithubBridge(
 
     if (queries.length > 0) {
       for (const q of queries) {
-        queryClient.setQueryData<{ task_prs: Record<string, TaskPR[]> }>(
-          q.queryKey,
-          (prev) => {
-            if (!prev) return prev;
-            return { ...prev, task_prs: upsertTaskPR(prev.task_prs, pr) };
-          },
-        );
+        queryClient.setQueryData<{ task_prs: Record<string, TaskPR[]> }>(q.queryKey, (prev) => {
+          if (!prev) return prev;
+          return { ...prev, task_prs: upsertTaskPR(prev.task_prs, pr) };
+        });
       }
     }
   });
@@ -103,9 +97,8 @@ export function registerGithubBridge(
     const update = message.payload as GitHubRateLimitUpdate;
     if (!update?.snapshots?.length) return;
 
-    queryClient.setQueryData<GitHubStatusResponse>(
-      qk.github.status(),
-      (prev) => applyRateLimitUpdate(prev, update),
+    queryClient.setQueryData<GitHubStatusResponse>(qk.github.status(), (prev) =>
+      applyRateLimitUpdate(prev, update),
     );
   });
 

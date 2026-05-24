@@ -114,10 +114,9 @@ describe("CliProfileEditor", () => {
       createdAt: CREATED_AT,
       updatedAt: CREATED_AT,
     };
-    renderWithAgents(
-      <CliProfileEditor mode="edit" profile={profile} onSaved={vi.fn()} />,
-      { items: [baseAvailableAgent] },
-    );
+    renderWithAgents(<CliProfileEditor mode="edit" profile={profile} onSaved={vi.fn()} />, {
+      items: [baseAvailableAgent],
+    });
 
     const nameInput = screen.getByLabelText("Profile name") as HTMLInputElement;
     expect(nameInput.value).toBe("default");
@@ -126,10 +125,9 @@ describe("CliProfileEditor", () => {
 
   it("invokes onCancel when the Cancel button is clicked", () => {
     const onCancel = vi.fn();
-    renderWithAgents(
-      <CliProfileEditor mode="create" onSaved={vi.fn()} onCancel={onCancel} />,
-      { items: [baseAvailableAgent] },
-    );
+    renderWithAgents(<CliProfileEditor mode="create" onSaved={vi.fn()} onCancel={onCancel} />, {
+      items: [baseAvailableAgent],
+    });
 
     fireEvent.click(screen.getByText("Cancel"));
     expect(onCancel).toHaveBeenCalled();
@@ -139,12 +137,7 @@ describe("CliProfileEditor", () => {
 describe("CliProfileEditor recommended flags", () => {
   it("can hide passthrough while showing recommended CLI flags", () => {
     renderWithAgents(
-      <CliProfileEditor
-        mode="create"
-        showAdvanced
-        allowCliPassthrough={false}
-        onSaved={vi.fn()}
-      />,
+      <CliProfileEditor mode="create" showAdvanced allowCliPassthrough={false} onSaved={vi.fn()} />,
       { items: [agentWithRecommendedFlag] },
     );
 

@@ -62,7 +62,9 @@ function createTestClient(): QueryClient {
   return new QueryClient({ defaultOptions: { queries: { retry: false, gcTime: 0 } } });
 }
 
-function makeTask(overrides: Partial<KanbanState["tasks"][number]> = {}): KanbanState["tasks"][number] {
+function makeTask(
+  overrides: Partial<KanbanState["tasks"][number]> = {},
+): KanbanState["tasks"][number] {
   return {
     id: "t1",
     workflowStepId: "s1",
@@ -178,7 +180,13 @@ describe("registerKanbanBridge — kanban.update", () => {
       steps: [],
       tasks: [
         { id: "t-real", workflowStepId: "s1", title: "Real", position: 0 },
-        { id: "t-ephem", workflowStepId: "s1", title: "Ephemeral", position: 1, is_ephemeral: true },
+        {
+          id: "t-ephem",
+          workflowStepId: "s1",
+          title: "Ephemeral",
+          position: 1,
+          is_ephemeral: true,
+        },
       ],
     });
     const tasks = getMulti(qc)?.snapshots[WF1]?.tasks ?? [];
@@ -436,21 +444,42 @@ describe("registerKanbanBridge — workflow events", () => {
 
   it("workflow.step.created adds a step", () => {
     ws.emit("workflow.step.created", {
-      step: { id: "s2", title: "Step 2", name: "Step 2", color: "bg-blue-400", position: 1, workflow_id: WF1 },
+      step: {
+        id: "s2",
+        title: "Step 2",
+        name: "Step 2",
+        color: "bg-blue-400",
+        position: 1,
+        workflow_id: WF1,
+      },
     });
     expect(getMulti(qc)?.snapshots[WF1]?.steps.map((s) => s.id)).toContain("s2");
   });
 
   it("workflow.step.created ignores duplicate step id", () => {
     ws.emit("workflow.step.created", {
-      step: { id: "s1", title: "Dup", name: "Dup", color: STEP_COLOR, position: 0, workflow_id: WF1 },
+      step: {
+        id: "s1",
+        title: "Dup",
+        name: "Dup",
+        color: STEP_COLOR,
+        position: 0,
+        workflow_id: WF1,
+      },
     });
     expect(getMulti(qc)?.snapshots[WF1]?.steps).toHaveLength(1);
   });
 
   it("workflow.step.updated patches the step", () => {
     ws.emit("workflow.step.updated", {
-      step: { id: "s1", title: "Step 1 Updated", name: "Step 1 Updated", color: STEP_COLOR, position: 0, workflow_id: WF1 },
+      step: {
+        id: "s1",
+        title: "Step 1 Updated",
+        name: "Step 1 Updated",
+        color: STEP_COLOR,
+        position: 0,
+        workflow_id: WF1,
+      },
     });
     expect(getMulti(qc)?.snapshots[WF1]?.steps[0].title).toBe("Step 1 Updated");
   });

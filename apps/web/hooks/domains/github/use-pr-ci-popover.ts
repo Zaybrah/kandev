@@ -60,12 +60,12 @@ export function usePRFeedbackBackgroundSync(pr: TaskPR | null): void {
  */
 export function usePRCIPopover(pr: TaskPR | null, enabled: boolean): Result {
   const qc = useQueryClient();
-  const { data: feedback, isFetching, dataUpdatedAt } = useQuery({
-    ...githubQueryOptions.prFeedback(
-      pr?.owner ?? null,
-      pr?.repo ?? null,
-      pr?.pr_number ?? null,
-    ),
+  const {
+    data: feedback,
+    isFetching,
+    dataUpdatedAt,
+  } = useQuery({
+    ...githubQueryOptions.prFeedback(pr?.owner ?? null, pr?.repo ?? null, pr?.pr_number ?? null),
     // Never auto-refetch; callers drive freshness.
     refetchOnWindowFocus: false,
     refetchOnMount: false,

@@ -22,8 +22,7 @@ export const linearQueryOptions = {
   watches: (workspaceId: string | null | undefined) =>
     queryOptions({
       queryKey: qk.linear.watches(workspaceId ?? null),
-      queryFn: () =>
-        listLinearIssueWatches(workspaceId ?? undefined, { cache: "no-store" }),
+      queryFn: () => listLinearIssueWatches(workspaceId ?? undefined, { cache: "no-store" }),
       // Skip fetching when the caller passes undefined (i.e. workspaceId === null
       // means all-workspace listing; undefined means skip entirely).
       enabled: workspaceId !== undefined,

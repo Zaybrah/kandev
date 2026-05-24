@@ -30,10 +30,7 @@ function resolveConfigProfileId(
  *
  * Returns a cleanup function that removes all registered handlers.
  */
-export function registerWorkspaceBridge(
-  ws: WebSocketClient,
-  queryClient: QueryClient,
-): () => void {
+export function registerWorkspaceBridge(ws: WebSocketClient, queryClient: QueryClient): () => void {
   const unsubCreated = ws.on("workspace.created", (message) => {
     const payload = message.payload;
     const newWorkspace: Workspace = {

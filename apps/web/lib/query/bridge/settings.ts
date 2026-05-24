@@ -41,8 +41,7 @@ function appendOutputInMap(
   const current = byAgent[payload.agent_name];
   if (!current) return byAgent;
   const next = (current.output ?? "") + payload.chunk;
-  const capped =
-    next.length > MAX_OUTPUT_BYTES ? next.slice(next.length - MAX_OUTPUT_BYTES) : next;
+  const capped = next.length > MAX_OUTPUT_BYTES ? next.slice(next.length - MAX_OUTPUT_BYTES) : next;
   return { ...byAgent, [payload.agent_name]: { ...current, output: capped } };
 }
 

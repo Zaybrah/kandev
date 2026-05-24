@@ -242,10 +242,7 @@ describe("registerGithubBridge — github.rate_limit.updated", () => {
 
     ws.emit(WS_RATE_LIMIT_UPDATED, {
       trigger: "core",
-      snapshots: [
-        makeRateLimitSnapshot("core", 4500),
-        makeRateLimitSnapshot("graphql", 100),
-      ],
+      snapshots: [makeRateLimitSnapshot("core", 4500), makeRateLimitSnapshot("graphql", 100)],
     });
 
     const status = qc.getQueryData<GitHubStatus>(qk.github.status());

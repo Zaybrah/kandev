@@ -1,12 +1,24 @@
 "use client";
 
-import { type Dispatch, type SetStateAction, useCallback, useState, useSyncExternalStore } from "react";
+import {
+  type Dispatch,
+  type SetStateAction,
+  useCallback,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@kandev/ui/button";
 import { useAppStore } from "@/components/state-provider";
 import { officeQueryOptions } from "@/lib/query/query-options/office";
 import { useOfficeRefetch } from "@/hooks/use-office-refetch";
-import type { TaskFilterState, TaskSortField, TaskSortDir, TaskGroupBy, OfficeTask } from "@/lib/state/slices/office/types";
+import type {
+  TaskFilterState,
+  TaskSortField,
+  TaskSortDir,
+  TaskGroupBy,
+  OfficeTask,
+} from "@/lib/state/slices/office/types";
 import { NewTaskDialog } from "../components/new-task-dialog";
 import { TasksToolbar } from "./tasks-toolbar";
 import { TasksContent } from "./tasks-content";
@@ -147,8 +159,17 @@ type TasksHandlers = {
 
 function useTasksHandlers(opts: TasksHandlersOptions): TasksHandlers {
   const {
-    workspaceId, tasks, filters, setFilters, sortField, sortDir,
-    nestingEnabled, expandedIds, setExpandedIds, triggerSearch, searchResults,
+    workspaceId,
+    tasks,
+    filters,
+    setFilters,
+    sortField,
+    sortDir,
+    nestingEnabled,
+    expandedIds,
+    setExpandedIds,
+    triggerSearch,
+    searchResults,
   } = opts;
   const handleFilterChange = useCallback(
     (patch: Record<string, unknown>) => {
@@ -200,9 +221,22 @@ export function TasksList() {
   const isLoading = useAppStore((s) => s.office.tasks.isLoading);
 
   const {
-    filters, setFilters, viewMode, setViewMode, sortField, setSortField,
-    sortDir, setSortDir, groupBy, setGroupBy, nestingEnabled, setNestingEnabled,
-    expandedIds, setExpandedIds, newTaskOpen, setNewTaskOpen,
+    filters,
+    setFilters,
+    viewMode,
+    setViewMode,
+    sortField,
+    setSortField,
+    sortDir,
+    setSortDir,
+    groupBy,
+    setGroupBy,
+    nestingEnabled,
+    setNestingEnabled,
+    expandedIds,
+    setExpandedIds,
+    newTaskOpen,
+    setNewTaskOpen,
   } = useTasksListState(workspaceId);
 
   const { data: agents = [] } = useQuery({
@@ -214,7 +248,11 @@ export function TasksList() {
   const agentMap = new Map(agents.map((a) => [a.id, a.name]));
 
   const { loadMore, hasMore, isLoadingMore, refetch } = usePaginatedTasks(
-    workspaceId, showSystem, filters, sortField, sortDir,
+    workspaceId,
+    showSystem,
+    filters,
+    sortField,
+    sortDir,
   );
   // WS-driven invalidation: refetch the current filter/sort/page-1 on
   // task lifecycle events so the list stays current.
@@ -222,26 +260,52 @@ export function TasksList() {
 
   const { handleFilterChange, handleSearchChange, handleToggleExpand, flatNodes } =
     useTasksHandlers({
-      workspaceId, tasks, filters, setFilters, sortField, sortDir,
-      nestingEnabled, expandedIds, setExpandedIds, triggerSearch, searchResults,
+      workspaceId,
+      tasks,
+      filters,
+      setFilters,
+      sortField,
+      sortDir,
+      nestingEnabled,
+      expandedIds,
+      setExpandedIds,
+      triggerSearch,
+      searchResults,
     });
 
   return (
     <div className="space-y-4 p-6">
       <TasksToolbar
-        viewMode={viewMode} nestingEnabled={nestingEnabled} filters={filters}
-        sortField={sortField} sortDir={sortDir} groupBy={groupBy} showSystem={showSystem}
-        onViewModeChange={setViewMode} onToggleNesting={() => setNestingEnabled((v) => !v)}
-        onFilterChange={handleFilterChange} onSortFieldChange={setSortField}
-        onSortDirChange={setSortDir} onGroupByChange={setGroupBy}
-        onSearchChange={handleSearchChange} onShowSystemChange={setShowSystem}
+        viewMode={viewMode}
+        nestingEnabled={nestingEnabled}
+        filters={filters}
+        sortField={sortField}
+        sortDir={sortDir}
+        groupBy={groupBy}
+        showSystem={showSystem}
+        onViewModeChange={setViewMode}
+        onToggleNesting={() => setNestingEnabled((v) => !v)}
+        onFilterChange={handleFilterChange}
+        onSortFieldChange={setSortField}
+        onSortDirChange={setSortDir}
+        onGroupByChange={setGroupBy}
+        onSearchChange={handleSearchChange}
+        onShowSystemChange={setShowSystem}
         onNewIssue={() => setNewTaskOpen(true)}
       />
       <TasksContent
-        viewMode={viewMode} isLoading={isLoading} flatNodes={flatNodes}
-        expandedIds={expandedIds} onToggleExpand={handleToggleExpand} agentMap={agentMap}
+        viewMode={viewMode}
+        isLoading={isLoading}
+        flatNodes={flatNodes}
+        expandedIds={expandedIds}
+        onToggleExpand={handleToggleExpand}
+        agentMap={agentMap}
       />
-      <LoadMoreButton visible={hasMore && !searchResults} loading={isLoadingMore} onClick={loadMore} />
+      <LoadMoreButton
+        visible={hasMore && !searchResults}
+        loading={isLoadingMore}
+        onClick={loadMore}
+      />
       <NewTaskDialog open={newTaskOpen} onOpenChange={setNewTaskOpen} />
     </div>
   );

@@ -28,8 +28,7 @@ export function useUserSettings() {
 export function useUpdateUserSettings() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (payload: Parameters<typeof updateUserSettings>[0]) =>
-      updateUserSettings(payload),
+    mutationFn: (payload: Parameters<typeof updateUserSettings>[0]) => updateUserSettings(payload),
     onMutate: async (_payload) => {
       await qc.cancelQueries({ queryKey: qk.settings.userSettings() });
       const snapshot = qc.getQueryData<UserSettingsResponse>(qk.settings.userSettings());

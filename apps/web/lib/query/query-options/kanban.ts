@@ -10,7 +10,22 @@ type KanbanTask = KanbanState["tasks"][number];
 // Helpers
 // ---------------------------------------------------------------------------
 
-function stepFromDTO(step: { id: string; name: string; color?: string; position?: number; events?: KanbanState["steps"][number]["events"]; show_in_command_panel?: boolean; allow_manual_move?: boolean; prompt?: string; is_start_step?: boolean; agent_profile_id?: string; stage_type?: KanbanState["steps"][number]["stage_type"] }, index: number): KanbanState["steps"][number] {
+function stepFromDTO(
+  step: {
+    id: string;
+    name: string;
+    color?: string;
+    position?: number;
+    events?: KanbanState["steps"][number]["events"];
+    show_in_command_panel?: boolean;
+    allow_manual_move?: boolean;
+    prompt?: string;
+    is_start_step?: boolean;
+    agent_profile_id?: string;
+    stage_type?: KanbanState["steps"][number]["stage_type"];
+  },
+  index: number,
+): KanbanState["steps"][number] {
   return {
     id: step.id,
     title: step.name,
@@ -88,8 +103,7 @@ export function multiKanbanQueryOptions(workspaceId: string) {
 export function workflowKanbanQueryOptions(workspaceId: string, wfId: string) {
   return {
     ...multiKanbanQueryOptions(workspaceId),
-    select: (data: KanbanMultiData): WorkflowSnapshotData | undefined =>
-      data.snapshots[wfId],
+    select: (data: KanbanMultiData): WorkflowSnapshotData | undefined => data.snapshots[wfId],
   };
 }
 

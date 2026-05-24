@@ -10,7 +10,11 @@ import {
 } from "@/lib/api/domains/github-api";
 import { githubQueryOptions } from "@/lib/query/query-options/github";
 import { qk } from "@/lib/query/keys";
-import type { ReviewWatch, CreateReviewWatchRequest, UpdateReviewWatchRequest } from "@/lib/types/github";
+import type {
+  ReviewWatch,
+  CreateReviewWatchRequest,
+  UpdateReviewWatchRequest,
+} from "@/lib/types/github";
 
 // useReviewWatches has three modes:
 //   - workspaceId: string         → fetch watches scoped to one workspace
@@ -18,13 +22,12 @@ import type { ReviewWatch, CreateReviewWatchRequest, UpdateReviewWatchRequest } 
 //   - workspaceId: null           → don't fetch (caller hasn't resolved a workspace yet)
 export function useReviewWatches(workspaceId?: string | null) {
   const qc = useQueryClient();
-  const cacheKey = workspaceId !== null
-    ? qk.github.reviewWatches(workspaceId ?? undefined)
-    : qk.github.reviewWatches();
+  const cacheKey =
+    workspaceId !== null
+      ? qk.github.reviewWatches(workspaceId ?? undefined)
+      : qk.github.reviewWatches();
 
-  const { data, isLoading, isSuccess } = useQuery(
-    githubQueryOptions.reviewWatches(workspaceId),
-  );
+  const { data, isLoading, isSuccess } = useQuery(githubQueryOptions.reviewWatches(workspaceId));
 
   const createMutation = useMutation({
     mutationFn: (req: CreateReviewWatchRequest) => createReviewWatch(req),

@@ -1,10 +1,7 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  updateWorkspaceRouting,
-  retryProvider,
-} from "@/lib/api/domains/office-routing-api";
+import { updateWorkspaceRouting, retryProvider } from "@/lib/api/domains/office-routing-api";
 import { officeQueryOptions } from "@/lib/query/query-options/office";
 import type { WorkspaceRouting } from "@/lib/state/slices/office/types";
 
@@ -28,8 +25,7 @@ export function useWorkspaceRouting(workspaceName: string | null): UseWorkspaceR
   });
 
   const updateMutation = useMutation({
-    mutationFn: (cfg: WorkspaceRouting) =>
-      updateWorkspaceRouting(workspaceName!, cfg),
+    mutationFn: (cfg: WorkspaceRouting) => updateWorkspaceRouting(workspaceName!, cfg),
     onSuccess: (_result, cfg) => {
       // Optimistically patch the cache so the UI updates instantly.
       qc.setQueryData(routingKey, (prev: typeof data) =>

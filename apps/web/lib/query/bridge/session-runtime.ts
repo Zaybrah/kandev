@@ -37,9 +37,17 @@ import type {
   SessionTodosPayload,
   SessionPromptUsagePayload,
 } from "@/lib/types/session-runtime-payloads";
-import type { GitStatusEntry, SessionCommit, TodoEntry } from "@/lib/state/slices/session-runtime/types";
+import type {
+  GitStatusEntry,
+  SessionCommit,
+  TodoEntry,
+} from "@/lib/state/slices/session-runtime/types";
 import { qk } from "@/lib/query/keys";
-import type { GitStatusData, SessionModeData, SessionModelsData } from "@/lib/query/query-options/session-runtime";
+import type {
+  GitStatusData,
+  SessionModeData,
+  SessionModelsData,
+} from "@/lib/query/query-options/session-runtime";
 import { invalidateCumulativeDiffCache } from "@/hooks/domains/session/use-cumulative-diff";
 
 // ---------------------------------------------------------------------------
@@ -70,17 +78,21 @@ function updateGitStatusData(
 ): GitStatusData {
   const repoName = incoming.repository_name ?? "";
   const existing = prev?.byEnvironmentId;
-  const shouldUpdate = !existing || hasGitStatusChanged(existing, incoming);
   const existingRepo = prev?.byEnvironmentRepo[repoName];
+
+  const shouldUpdate = !existing || hasGitStatusChanged(existing, incoming);
   const shouldUpdateRepo = !existingRepo || hasGitStatusChanged(existingRepo, incoming);
 
-  if (!shouldUpdate && !shouldUpdateRepo) return prev ?? { byEnvironmentId: incoming, byEnvironmentRepo: { [repoName]: incoming } };
+  if (!shouldUpdate && !shouldUpdateRepo) {
+    return prev ?? { byEnvironmentId: incoming, byEnvironmentRepo: { [repoName]: incoming } };
+  }
+
+  const prevRepos = prev ? prev.byEnvironmentRepo : {};
+  const prevById = prev ? prev.byEnvironmentId : incoming;
 
   return {
-    byEnvironmentId: shouldUpdate ? incoming : (prev?.byEnvironmentId ?? incoming),
-    byEnvironmentRepo: shouldUpdateRepo
-      ? { ...(prev?.byEnvironmentRepo ?? {}), [repoName]: incoming }
-      : (prev?.byEnvironmentRepo ?? {}),
+    byEnvironmentId: shouldUpdate ? incoming : prevById,
+    byEnvironmentRepo: shouldUpdateRepo ? { ...prevRepos, [repoName]: incoming } : prevRepos,
   };
 }
 
@@ -118,9 +130,8 @@ function registerGitHandlers(
           branch_deletions: payload.status.branch_deletions,
           repository_name: payload.status.repository_name,
         };
-        qc.setQueryData<GitStatusData>(
-          qk.session.git(envKey),
-          (prev) => updateGitStatusData(prev, incoming),
+        qc.setQueryData<GitStatusData>(qk.session.git(envKey), (prev) =>
+          updateGitStatusData(prev, incoming),
         );
         invalidateCumulativeDiffCache(envKey);
         break;
@@ -139,7 +150,7 @@ function registerGitHandlers(
           insertions: payload.commit.insertions,
           deletions: payload.commit.deletions,
           committed_at: payload.commit.committed_at,
-          created_at: payload.commit.created_at ?? (message.timestamp ?? ""),
+          created_at: payload.commit.created_at ?? message.timestamp ?? "",
           repository_name: payload.commit.repository_name,
         };
         qc.setQueryData<SessionCommit[]>(qk.session.commits(envKey), (prev) => {
@@ -177,10 +188,7 @@ function registerGitHandlers(
 // Session data handlers sub-registrar (mode, models, todos, usage, capabilities)
 // ---------------------------------------------------------------------------
 
-function registerSessionDataHandlers(
-  ws: WebSocketClient,
-  qc: QueryClient,
-): Array<() => void> {
+function registerSessionDataHandlers(ws: WebSocketClient, qc: QueryClient): Array<() => void> {
   const unsubMode = ws.on("session.mode_changed", (message) => {
     const payload = message.payload as SessionModeChangedPayload | undefined;
     if (!payload?.session_id) return;
@@ -265,7 +273,11 @@ function registerSessionDataHandlers(
         name: m.name,
         description: m.description,
         terminalAuth: m.terminal_auth
-          ? { command: m.terminal_auth.command, args: m.terminal_auth.args, label: m.terminal_auth.label }
+          ? {
+              command: m.terminal_auth.command,
+              args: m.terminal_auth.args,
+              label: m.terminal_auth.label,
+            }
           : undefined,
         meta: m.meta,
       })),
@@ -287,7 +299,9 @@ function registerSessionDataHandlers(
 // Prepare progress handlers sub-registrar
 // ---------------------------------------------------------------------------
 
-type PrepareStep = NonNullable<import("@/lib/state/slices/session-runtime/types").PrepareProgressState["bySessionId"][string]>["steps"][number];
+type PrepareStep = NonNullable<
+  import("@/lib/state/slices/session-runtime/types").PrepareProgressState["bySessionId"][string]
+>["steps"][number];
 
 function updatePrepareSteps(
   existing: PrepareStep[],
@@ -311,11 +325,10 @@ function updatePrepareSteps(
   return steps;
 }
 
-function registerPrepareHandlers(
-  ws: WebSocketClient,
-  qc: QueryClient,
-): Array<() => void> {
-  type PrepareState = NonNullable<import("@/lib/state/slices/session-runtime/types").PrepareProgressState["bySessionId"][string]>;
+function registerPrepareHandlers(ws: WebSocketClient, qc: QueryClient): Array<() => void> {
+  type PrepareState = NonNullable<
+    import("@/lib/state/slices/session-runtime/types").PrepareProgressState["bySessionId"][string]
+  >;
 
   const unsubProgress = ws.on("executor.prepare.progress", (message) => {
     const payload = message.payload as PrepareProgressPayload;

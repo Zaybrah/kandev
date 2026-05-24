@@ -117,19 +117,37 @@ describe("registerSettingsBridge — secrets", () => {
     qc = createTestClient();
     registerSettingsBridge(ws as never, qc);
     qc.setQueryData(qk.settings.secrets(), [
-      { id: "sec-1", name: "MY_SECRET", has_value: true, created_at: "", updated_at: "" } satisfies SecretListItem,
+      {
+        id: "sec-1",
+        name: "MY_SECRET",
+        has_value: true,
+        created_at: "",
+        updated_at: "",
+      } satisfies SecretListItem,
     ]);
   });
 
   it("adds a secret on secrets.created", () => {
-    const newSecret: SecretListItem = { id: "sec-2", name: "NEW_SECRET", has_value: true, created_at: "", updated_at: "" };
+    const newSecret: SecretListItem = {
+      id: "sec-2",
+      name: "NEW_SECRET",
+      has_value: true,
+      created_at: "",
+      updated_at: "",
+    };
     ws.emit("secrets.created", newSecret);
     const secrets = qc.getQueryData<SecretListItem[]>(qk.settings.secrets());
     expect(secrets?.map((s) => s.id)).toContain("sec-2");
   });
 
   it("updates a secret on secrets.updated", () => {
-    ws.emit("secrets.updated", { id: "sec-1", name: "MY_SECRET_UPDATED", has_value: true, created_at: "", updated_at: "" });
+    ws.emit("secrets.updated", {
+      id: "sec-1",
+      name: "MY_SECRET_UPDATED",
+      has_value: true,
+      created_at: "",
+      updated_at: "",
+    });
     const secrets = qc.getQueryData<SecretListItem[]>(qk.settings.secrets());
     expect(secrets?.find((s) => s.id === "sec-1")?.name).toBe("MY_SECRET_UPDATED");
   });
@@ -172,7 +190,11 @@ describe("registerSettingsBridge — install jobs", () => {
       started_at: TS_JAN_2024,
     };
     qc.setQueryData(qk.settings.installJobs(), [job]);
-    ws.emit("agent.install.output", { job_id: "job-1", agent_name: AGENT_CLAUDE_CODE, chunk: "Installing...\n" });
+    ws.emit("agent.install.output", {
+      job_id: "job-1",
+      agent_name: AGENT_CLAUDE_CODE,
+      chunk: "Installing...\n",
+    });
     const jobs = qc.getQueryData<InstallJob[]>(qk.settings.installJobs());
     expect(jobs?.find((j) => j.job_id === "job-1")?.output).toBe("Installing...\n");
   });
@@ -186,7 +208,11 @@ describe("registerSettingsBridge — install jobs", () => {
       output: "x".repeat(64 * 1024 - 5),
     };
     qc.setQueryData(qk.settings.installJobs(), [job]);
-    ws.emit("agent.install.output", { job_id: "job-1", agent_name: AGENT_CLAUDE_CODE, chunk: "overflow" });
+    ws.emit("agent.install.output", {
+      job_id: "job-1",
+      agent_name: AGENT_CLAUDE_CODE,
+      chunk: "overflow",
+    });
     const jobs = qc.getQueryData<InstallJob[]>(qk.settings.installJobs());
     const output = jobs?.find((j) => j.job_id === "job-1")?.output ?? "";
     expect(output.length).toBeLessThanOrEqual(64 * 1024);

@@ -118,7 +118,12 @@ export function SkillDetail({ skill, onSave, onDelete }: SkillDetailProps) {
 
       {hasFiles && (
         <div className="border border-border rounded-lg max-h-[200px] overflow-y-auto">
-          <FileTree nodes={fileTree} selectedPath={activeFilePath} onSelectPath={setSelectedFile} defaultExpanded />
+          <FileTree
+            nodes={fileTree}
+            selectedPath={activeFilePath}
+            onSelectPath={setSelectedFile}
+            defaultExpanded
+          />
         </div>
       )}
       <SkillContentEditor
@@ -156,15 +161,31 @@ function SkillContentEditor({
       <div className="flex items-center justify-between">
         <span className="text-sm font-mono text-muted-foreground">{activeFilePath}</span>
         {!readOnly && (
-          <Button variant="outline" size="sm" onClick={onSave} disabled={!isDirty || isSaving} className="cursor-pointer">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onSave}
+            disabled={!isDirty || isSaving}
+            className="cursor-pointer"
+          >
             <IconDeviceFloppy className="h-4 w-4 mr-1" />
             {isSaving ? "Saving…" : "Save"}
           </Button>
         )}
       </div>
-      <div className="border border-border rounded-lg overflow-hidden" data-testid="skill-content-editor" data-readonly={readOnly ? "true" : "false"}>
+      <div
+        className="border border-border rounded-lg overflow-hidden"
+        data-testid="skill-content-editor"
+        data-readonly={readOnly ? "true" : "false"}
+      >
         {readOnly && <span data-testid="skill-content-readonly" hidden />}
-        <ScriptEditor value={draft} onChange={onChange} language="markdown" height="520px" readOnly={readOnly} />
+        <ScriptEditor
+          value={draft}
+          onChange={onChange}
+          language="markdown"
+          height="520px"
+          readOnly={readOnly}
+        />
       </div>
     </div>
   );

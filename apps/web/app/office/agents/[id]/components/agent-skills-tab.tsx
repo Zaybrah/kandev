@@ -85,7 +85,14 @@ export function AgentSkillsTab({ agent }: AgentSkillsTabProps) {
   );
 }
 
-type Skill = { id: string; name: string; slug: string; isSystem?: boolean; systemVersion?: string; defaultForRoles?: string[] };
+type Skill = {
+  id: string;
+  name: string;
+  slug: string;
+  isSystem?: boolean;
+  systemVersion?: string;
+  defaultForRoles?: string[];
+};
 
 function SkillList({
   skills,
@@ -130,13 +137,11 @@ function SkillList({
             {isDefault && (
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <span className="text-[10px] text-muted-foreground">
-                    default for {agentRole}
-                  </span>
+                  <span className="text-[10px] text-muted-foreground">default for {agentRole}</span>
                 </TooltipTrigger>
                 <TooltipContent>
-                  This skill is auto-attached to new {agentRole} agents. You can still untick it
-                  for this agent.
+                  This skill is auto-attached to new {agentRole} agents. You can still untick it for
+                  this agent.
                 </TooltipContent>
               </Tooltip>
             )}

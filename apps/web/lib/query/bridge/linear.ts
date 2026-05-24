@@ -16,10 +16,7 @@ import type { WebSocketClient } from "@/lib/ws/client";
  *    `linear.watch.triggered` WS pushes — add a handler here and call
  *    qc.invalidateQueries({ queryKey: qk.linear.watches(wsId) }).
  */
-export function registerLinearBridge(
-  _ws: WebSocketClient,
-  _qc: QueryClient,
-): () => void {
+export function registerLinearBridge(_ws: WebSocketClient, _qc: QueryClient): () => void {
   // No WS events for linear watches or availability.
   // Mutations invalidate the watches key directly after each operation.
   return () => {

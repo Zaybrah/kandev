@@ -24,7 +24,8 @@ export const qk = {
     all: () => ["workspaces"] as const,
     one: (id: string) => ["workspaces", id] as const,
     repos: (id: string) => ["workspaces", id, "repos"] as const,
-    branches: (wsId: string, repoId: string) => ["workspaces", wsId, "repos", repoId, "branches"] as const,
+    branches: (wsId: string, repoId: string) =>
+      ["workspaces", wsId, "repos", repoId, "branches"] as const,
   },
 
   // -------------------------------------------------------------------------
@@ -236,7 +237,6 @@ export const qk = {
         : (["settings", "installJobs"] as const),
     systemHealth: () => ["settings", "systemHealth"] as const,
     remoteAuthSpecs: () => ["settings", "remoteAuthSpecs"] as const,
-    dynamicModels: (agentName: string) =>
-      ["settings", "dynamicModels", agentName] as const,
+    dynamicModels: (agentName: string) => ["settings", "dynamicModels", agentName] as const,
   },
 } as const;

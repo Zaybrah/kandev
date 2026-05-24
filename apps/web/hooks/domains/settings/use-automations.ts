@@ -11,7 +11,11 @@ import {
 } from "@/lib/api/domains/automation-api";
 import { automationsQueryOptions } from "@/lib/query/query-options/automations";
 import { qk } from "@/lib/query/keys";
-import type { CreateAutomationRequest, UpdateAutomationRequest, Automation } from "@/lib/types/automation";
+import type {
+  CreateAutomationRequest,
+  UpdateAutomationRequest,
+  Automation,
+} from "@/lib/types/automation";
 
 export function useAutomations(workspaceId: string | null) {
   const qc = useQueryClient();
@@ -35,10 +39,8 @@ export function useAutomations(workspaceId: string | null) {
     mutationFn: ({ id, req }: { id: string; req: UpdateAutomationRequest }) =>
       apiUpdateAutomation(id, req),
     onSuccess: (updated) => {
-      qc.setQueryData(
-        qk.automations.list(safeId),
-        (prev: Automation[] | undefined) =>
-          prev ? prev.map((a) => (a.id === updated.id ? updated : a)) : [updated],
+      qc.setQueryData(qk.automations.list(safeId), (prev: Automation[] | undefined) =>
+        prev ? prev.map((a) => (a.id === updated.id ? updated : a)) : [updated],
       );
     },
   });
@@ -56,10 +58,8 @@ export function useAutomations(workspaceId: string | null) {
   const enableMutation = useMutation({
     mutationFn: (id: string) => enableAutomation(id),
     onSuccess: (updated) => {
-      qc.setQueryData(
-        qk.automations.list(safeId),
-        (prev: Automation[] | undefined) =>
-          prev ? prev.map((a) => (a.id === updated.id ? updated : a)) : [updated],
+      qc.setQueryData(qk.automations.list(safeId), (prev: Automation[] | undefined) =>
+        prev ? prev.map((a) => (a.id === updated.id ? updated : a)) : [updated],
       );
     },
   });
@@ -67,10 +67,8 @@ export function useAutomations(workspaceId: string | null) {
   const disableMutation = useMutation({
     mutationFn: (id: string) => disableAutomation(id),
     onSuccess: (updated) => {
-      qc.setQueryData(
-        qk.automations.list(safeId),
-        (prev: Automation[] | undefined) =>
-          prev ? prev.map((a) => (a.id === updated.id ? updated : a)) : [updated],
+      qc.setQueryData(qk.automations.list(safeId), (prev: Automation[] | undefined) =>
+        prev ? prev.map((a) => (a.id === updated.id ? updated : a)) : [updated],
       );
     },
   });

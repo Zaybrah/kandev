@@ -41,30 +41,49 @@ type SidebarNavCounts = {
   totalLiveSessions: number;
 };
 
-function SidebarNav({
-  counts,
-  onNewTask,
-}: {
-  counts: SidebarNavCounts;
-  onNewTask: () => void;
-}) {
+function SidebarNav({ counts, onNewTask }: { counts: SidebarNavCounts; onNewTask: () => void }) {
   const { inboxCount, taskCount, skillCount, routineCount, totalLiveSessions } = counts;
   return (
     <nav className="flex-1 min-h-0 overflow-y-auto flex flex-col gap-4 px-3 py-2">
       <div className="flex flex-col gap-0.5">
-        <SidebarNavItem icon={IconSquarePlus} label="New Task" href="/office/tasks" onClick={onNewTask} />
-        <SidebarNavItem icon={IconLayoutDashboard} label="Dashboard" href="/office" liveCount={totalLiveSessions} />
+        <SidebarNavItem
+          icon={IconSquarePlus}
+          label="New Task"
+          href="/office/tasks"
+          onClick={onNewTask}
+        />
+        <SidebarNavItem
+          icon={IconLayoutDashboard}
+          label="Dashboard"
+          href="/office"
+          liveCount={totalLiveSessions}
+        />
         <SidebarNavItem icon={IconInbox} label="Inbox" href="/office/inbox" badge={inboxCount} />
       </div>
       <SidebarSection label="Work">
-        <SidebarNavItem icon={IconCircleDot} label="Tasks" href="/office/tasks" badge={taskCount > 0 ? taskCount : undefined} />
-        <SidebarNavItem icon={IconRepeat} label="Routines" href="/office/routines" badge={routineCount > 0 ? routineCount : undefined} />
+        <SidebarNavItem
+          icon={IconCircleDot}
+          label="Tasks"
+          href="/office/tasks"
+          badge={taskCount > 0 ? taskCount : undefined}
+        />
+        <SidebarNavItem
+          icon={IconRepeat}
+          label="Routines"
+          href="/office/routines"
+          badge={routineCount > 0 ? routineCount : undefined}
+        />
       </SidebarSection>
       <SidebarProjectsList />
       <SidebarAgentsList />
       <SidebarSection label="Workspace">
         <SidebarNavItem icon={IconSitemap} label="Org" href="/office/workspace/org" />
-        <SidebarNavItem icon={IconBoxMultiple} label="Skills" href="/office/workspace/skills" badge={skillCount > 0 ? skillCount : undefined} />
+        <SidebarNavItem
+          icon={IconBoxMultiple}
+          label="Skills"
+          href="/office/workspace/skills"
+          badge={skillCount > 0 ? skillCount : undefined}
+        />
         <SidebarNavItem icon={IconCurrencyDollar} label="Costs" href="/office/workspace/costs" />
         <SidebarNavItem icon={IconHistory} label="Activity" href="/office/workspace/activity" />
         <SidebarNavItem icon={IconRoute} label="Routing" href="/office/workspace/routing" />

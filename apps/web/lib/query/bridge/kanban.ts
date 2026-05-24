@@ -37,10 +37,7 @@ type Snapshot = import("@/lib/state/slices/kanban/types").WorkflowSnapshotData;
  *
  * Exported so bridge tests can assert the merge logic independently.
  */
-export function applyIfNewer(
-  prev: KanbanTask | undefined,
-  next: KanbanTask,
-): KanbanTask {
+export function applyIfNewer(prev: KanbanTask | undefined, next: KanbanTask): KanbanTask {
   if (!prev) return next;
   const prevTs = prev.updatedAt;
   const nextTs = next.updatedAt;
@@ -106,10 +103,7 @@ function buildTasksFromKanbanUpdate(
     });
 }
 
-function upsertTaskInSnapshot(
-  snapshot: Snapshot,
-  nextTask: KanbanTask,
-): Snapshot {
+function upsertTaskInSnapshot(snapshot: Snapshot, nextTask: KanbanTask): Snapshot {
   const prevById = new Map(snapshot.tasks.map((t) => [t.id, t]));
   const merged = applyIfNewer(prevById.get(nextTask.id), nextTask);
   const exists = prevById.has(nextTask.id);
@@ -129,10 +123,7 @@ function removeTaskFromSnapshot(snapshot: Snapshot, taskId: string): Snapshot {
 
 type Updater = (prev: KanbanMultiData | undefined) => KanbanMultiData | undefined;
 
-function patchSnapshot(
-  wfId: string,
-  fn: (snap: Snapshot) => Snapshot,
-): Updater {
+function patchSnapshot(wfId: string, fn: (snap: Snapshot) => Snapshot): Updater {
   return (prev) => {
     if (!prev) return prev;
     const snap = prev.snapshots[wfId];
@@ -161,7 +152,11 @@ function registerKanbanUpdateHandler(
   multi: ReturnType<typeof qk.kanban.multi>,
 ): () => void {
   return ws.on("kanban.update", (message) => {
-    const { workflowId, steps: rawSteps, tasks: rawTasks } = message.payload as {
+    const {
+      workflowId,
+      steps: rawSteps,
+      tasks: rawTasks,
+    } = message.payload as {
       workflowId: string;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       steps: any[];
@@ -257,13 +252,19 @@ function applyTaskUpdated(payload: TaskUpdatedPayload): Updater {
     if (oldWfId && oldWfId !== wfId) {
       const oldSnap = next.snapshots[oldWfId];
       if (oldSnap) {
-        next = { ...next, snapshots: { ...next.snapshots, [oldWfId]: removeTaskFromSnapshot(oldSnap, taskId) } };
+        next = {
+          ...next,
+          snapshots: { ...next.snapshots, [oldWfId]: removeTaskFromSnapshot(oldSnap, taskId) },
+        };
       }
     }
     if (payload.archived_at) {
       const snap = next.snapshots[wfId];
       if (snap) {
-        next = { ...next, snapshots: { ...next.snapshots, [wfId]: removeTaskFromSnapshot(snap, taskId) } };
+        next = {
+          ...next,
+          snapshots: { ...next.snapshots, [wfId]: removeTaskFromSnapshot(snap, taskId) },
+        };
       }
       return next;
     }
@@ -299,7 +300,8 @@ function registerWorkflowHandlers(
   });
 
   const unsubStepCreated = ws.on("workflow.step.created", (message) => {
-    const step = (message.payload as { step: { workflow_id: string } & Record<string, unknown> }).step;
+    const step = (message.payload as { step: { workflow_id: string } & Record<string, unknown> })
+      .step;
     const wfId = step.workflow_id as string;
     queryClient.setQueryData<KanbanMultiData>(
       multi,
@@ -314,7 +316,8 @@ function registerWorkflowHandlers(
   });
 
   const unsubStepUpdated = ws.on("workflow.step.updated", (message) => {
-    const step = (message.payload as { step: { workflow_id: string } & Record<string, unknown> }).step;
+    const step = (message.payload as { step: { workflow_id: string } & Record<string, unknown> })
+      .step;
     const wfId = step.workflow_id as string;
     queryClient.setQueryData<KanbanMultiData>(
       multi,
@@ -353,10 +356,7 @@ function registerWorkflowHandlers(
  * Registers WS handlers for kanban, task, and workflow events.
  * Returns a cleanup function that unsubscribes all handlers.
  */
-export function registerKanbanBridge(
-  ws: WebSocketClient,
-  queryClient: QueryClient,
-): () => void {
+export function registerKanbanBridge(ws: WebSocketClient, queryClient: QueryClient): () => void {
   const multi = qk.kanban.multi();
   const unsubKanbanUpdate = registerKanbanUpdateHandler(ws, queryClient, multi);
   const taskUnsubs = registerTaskHandlers(ws, queryClient, multi);

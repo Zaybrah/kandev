@@ -6,9 +6,7 @@ import { qk } from "@/lib/query/keys";
 
 export function useGitHubStatus() {
   const qc = useQueryClient();
-  const { data: status, isLoading, isFetching, isSuccess } = useQuery(
-    githubQueryOptions.status(),
-  );
+  const { data: status, isLoading, isFetching, isSuccess } = useQuery(githubQueryOptions.status());
 
   function refresh() {
     // Invalidate both github status and system health so the header indicator refetches.

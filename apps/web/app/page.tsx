@@ -137,7 +137,10 @@ async function loadSnapshotState(
 async function prefetchKanbanMulti(
   workspaceId: string,
   workflowList: Awaited<ReturnType<typeof listWorkflows>>,
-): Promise<{ qc: ReturnType<typeof makeQueryClient>; dehydratedState: ReturnType<typeof dehydrate> }> {
+): Promise<{
+  qc: ReturnType<typeof makeQueryClient>;
+  dehydratedState: ReturnType<typeof dehydrate>;
+}> {
   const qc = makeQueryClient();
 
   const entries = await Promise.all(
@@ -151,7 +154,9 @@ async function prefetchKanbanMulti(
     }),
   );
 
-  const snapshots = Object.fromEntries(entries.filter((e): e is NonNullable<typeof e> => e !== null));
+  const snapshots = Object.fromEntries(
+    entries.filter((e): e is NonNullable<typeof e> => e !== null),
+  );
   const multiData: KanbanMultiData = { snapshots };
 
   qc.setQueryData(multiKanbanQueryOptions(workspaceId).queryKey, multiData);

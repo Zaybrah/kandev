@@ -43,8 +43,7 @@ export function usePRWatches() {
 export function usePRWatchForSession(sessionId: string | null): PRWatch | null {
   const { data } = useQuery({
     ...githubQueryOptions.prWatches(),
-    select: (d) =>
-      sessionId ? (d.watches.find((w) => w.session_id === sessionId) ?? null) : null,
+    select: (d) => (sessionId ? (d.watches.find((w) => w.session_id === sessionId) ?? null) : null),
   });
   return data ?? null;
 }

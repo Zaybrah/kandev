@@ -17,7 +17,7 @@ import {
 } from "@/lib/api/domains/session-api";
 import { getTaskPlan } from "@/lib/api/domains/plan-api";
 import { getQueueStatus } from "@/lib/api/domains/queue-api";
-import type { Message, Turn, TaskSession, TaskPlan } from "@/lib/types/http";
+import type { Message, Turn, TaskPlan } from "@/lib/types/http";
 import type { QueuedMessage, QueueMeta } from "@/lib/state/slices/session/types";
 
 // ---------------------------------------------------------------------------
