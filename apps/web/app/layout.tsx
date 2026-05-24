@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
-import { QueryProvider } from "@/lib/query/provider";
+import { QueryProvider, QueryBridge } from "@/lib/query/provider";
 import { StateProvider } from "@/components/state-provider";
 import { WebSocketConnector } from "@/components/ws-connector";
 import { ToastProvider } from "@/components/toast-provider";
@@ -74,6 +74,7 @@ export default async function RootLayout({
         ) : null}
         <QueryProvider state={dehydratedState}>
           <StateProvider initialState={{}}>
+            <QueryBridge />
             <ThemeProvider>
               <DiffWorkerPoolProvider>
                 <TooltipProvider>

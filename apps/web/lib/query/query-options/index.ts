@@ -29,3 +29,4 @@ export * from "./gitlab";
 export * from "./jira";
 export * from "./linear";
 export * from "./kanban";
+export * from "./office";

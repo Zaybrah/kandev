@@ -11,6 +11,12 @@ import { registerGitlabBridge } from "./gitlab";
 import { registerJiraBridge } from "./jira";
 import { registerLinearBridge } from "./linear";
 import { registerKanbanBridge } from "./kanban";
+import { registerOfficeBridge } from "./office";
+
+export interface QueryBridgeOptions {
+  /** Returns the currently-active workspace ID, or undefined if none. */
+  getActiveWorkspaceId: () => string | undefined;
+}
 
 /**
  * Registers the WS → TanStack Query bridge.
@@ -25,6 +31,7 @@ import { registerKanbanBridge } from "./kanban";
 export function registerQueryBridge(
   ws: WebSocketClient,
   queryClient: QueryClient,
+  options: QueryBridgeOptions,
 ): () => void {
   const cleanups: Array<() => void> = [
     registerFeaturesBridge(ws, queryClient),
@@ -38,6 +45,7 @@ export function registerQueryBridge(
     registerJiraBridge(ws, queryClient),
     registerLinearBridge(ws, queryClient),
     registerKanbanBridge(ws, queryClient),
+    registerOfficeBridge(ws, queryClient, options.getActiveWorkspaceId),
   ];
   return () => {
     for (const fn of cleanups) fn();

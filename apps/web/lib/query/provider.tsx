@@ -11,6 +11,7 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { getBrowserQueryClient } from "@/lib/query/client";
 import { registerQueryBridge } from "@/lib/query/bridge/index";
 import { getWebSocketClient } from "@/lib/ws/connection";
+import { useAppStoreApi } from "@/components/state-provider";
 
 interface QueryProviderProps {
   children: React.ReactNode;
@@ -19,27 +20,15 @@ interface QueryProviderProps {
 }
 
 /**
- * Registers the WS → TQ bridge once after mount.
- * Kept in a separate component so the bridge setup can reference the
- * QueryClient from context without prop-drilling.
- */
-function BridgeRegistrar() {
-  const queryClient = useQueryClient();
-
-  useEffect(() => {
-    const ws = getWebSocketClient();
-    if (!ws) return;
-    return registerQueryBridge(ws, queryClient);
-  }, [queryClient]);
-
-  return null;
-}
-
-/**
  * Root QueryClientProvider for the app.
  *
+ * Mounts the QueryClient + HydrationBoundary + devtools. Bridge
+ * registration lives in <QueryBridge /> (mounted inside StateProvider)
+ * because the office bridge needs to read the active workspace ID
+ * from the Zustand store.
+ *
  * Usage in app/layout.tsx (outside <StateProvider>):
- *   <QueryProvider>{children}</QueryProvider>
+ *   <QueryProvider state={dehydratedState}>{children}</QueryProvider>
  *
  * Usage in page-level server components (for SSR prefetch):
  *   <QueryProvider state={dehydrate(serverQueryClient)}>{children}</QueryProvider>
@@ -49,11 +38,29 @@ export function QueryProvider({ children, state }: QueryProviderProps) {
 
   return (
     <QueryClientProvider client={client}>
-      <HydrationBoundary state={state}>
-        <BridgeRegistrar />
-        {children}
-      </HydrationBoundary>
+      <HydrationBoundary state={state}>{children}</HydrationBoundary>
       {process.env.NODE_ENV !== "production" && <ReactQueryDevtools initialIsOpen={false} />}
     </QueryClientProvider>
   );
+}
+
+/**
+ * Mounts the WS → TanStack Query bridge once after the StateProvider
+ * is available. Lives inside StateProvider so it can read the active
+ * workspace ID from the Zustand store — the office bridge scopes its
+ * cache invalidations to the active workspace.
+ */
+export function QueryBridge() {
+  const queryClient = useQueryClient();
+  const storeApi = useAppStoreApi();
+
+  useEffect(() => {
+    const ws = getWebSocketClient();
+    if (!ws) return;
+    return registerQueryBridge(ws, queryClient, {
+      getActiveWorkspaceId: () => storeApi.getState().workspaces.activeId ?? undefined,
+    });
+  }, [queryClient, storeApi]);
+
+  return null;
 }
