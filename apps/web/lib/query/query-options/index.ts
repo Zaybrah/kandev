@@ -24,4 +24,8 @@ export * from "./workspace";
 export * from "./settings";
 export * from "./automations";
 export * from "./integrations";
+export * from "./github";
+export * from "./gitlab";
 export * from "./jira";
+export * from "./linear";
+export * from "./kanban";
