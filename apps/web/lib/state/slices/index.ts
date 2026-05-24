@@ -10,7 +10,6 @@ export {
 export { createUISlice, defaultUIState } from "./ui/ui-slice";
 export { createGitHubSlice, defaultGitHubState } from "./github/github-slice";
 export { createGitLabSlice, defaultGitLabState } from "./gitlab/gitlab-slice";
-export { createJiraSlice, defaultJiraState } from "./jira/jira-slice";
 export { createLinearSlice, defaultLinearState } from "./linear/linear-slice";
 export { createOfficeSlice, defaultOfficeState } from "./office/office-slice";
 // Export types
@@ -31,12 +30,6 @@ export type {
   GitLabSliceActions,
   TaskMRsState,
 } from "./gitlab/types";
-export type {
-  JiraSlice,
-  JiraSliceState,
-  JiraSliceActions,
-  JiraIssueWatchesState,
-} from "./jira/types";
 export type {
   LinearSlice,
   LinearSliceState,

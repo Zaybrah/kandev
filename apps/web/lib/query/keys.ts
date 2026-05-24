@@ -95,10 +95,20 @@ export const qk = {
 
   // -------------------------------------------------------------------------
   // Jira
+  // Invalidate together with prefix ["jira"] or ["jira", wsId].
+  //
+  // issueWatches(wsId?)  — List of JIRA issue watchers.
+  //   • wsId provided → scoped to one workspace
+  //   • wsId omitted  → install-wide list (all workspaces)
+  //   • pass null via enabled:false guard in the hook, not via the key
   // -------------------------------------------------------------------------
   jira: {
-    prefix: (wsId: string) => ["jira", wsId] as const,
-    issues: (wsId: string) => ["jira", wsId, "issues"] as const,
+    prefix: () => ["jira"] as const,
+    workspacePrefix: (wsId: string) => ["jira", wsId] as const,
+    issueWatches: (wsId?: string) =>
+      wsId !== undefined
+        ? (["jira", wsId, "issueWatches"] as const)
+        : (["jira", "issueWatches"] as const),
   },
 
   // -------------------------------------------------------------------------
