@@ -6,6 +6,10 @@ import { registerWorkspaceBridge } from "./workspace";
 import { registerSettingsBridge } from "./settings";
 import { registerAutomationsBridge } from "./automations";
 import { registerIntegrationsBridge } from "./integrations";
+import { registerGithubBridge } from "./github";
+import { registerGitlabBridge } from "./gitlab";
+import { registerJiraBridge } from "./jira";
+import { registerLinearBridge } from "./linear";
 import { registerKanbanBridge } from "./kanban";
 
 /**
@@ -29,6 +33,10 @@ export function registerQueryBridge(
     registerSettingsBridge(ws, queryClient),
     registerAutomationsBridge(ws, queryClient),
     registerIntegrationsBridge(ws, queryClient),
+    registerGithubBridge(ws, queryClient),
+    registerGitlabBridge(ws, queryClient),
+    registerJiraBridge(ws, queryClient),
+    registerLinearBridge(ws, queryClient),
     registerKanbanBridge(ws, queryClient),
   ];
   return () => {
