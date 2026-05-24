@@ -7,7 +7,7 @@
 ```
 apps/
 ├── backend/          # Go backend (orchestrator, agent runtime, agentctl, WS gateway)
-├── web/              # Next.js frontend (SSR + WS + Zustand)
+├── web/              # Next.js frontend (SSR + WS + TanStack Query + Zustand)
 ├── cli/              # CLI tool (TypeScript)
 ├── landing/          # Landing page
 └── packages/         # Shared packages/types
@@ -253,13 +253,14 @@ import { Dialog } from '@kandev/ui/dialog';
 
 ### Data Flow Pattern (Critical)
 
-```
-SSR Fetch -> Hydrate Store -> Components Read Store -> Hooks Subscribe
-```
-
-**Never fetch data directly in components.**
+- SSR prefetch hydrates the TanStack Query cache (via `HydrationBoundary` / dehydrated state) for server-owned data.
+- WS events flow into the TQ cache via per-domain bridges (`lib/query/bridge/*.ts`) — registered from `QueryBridge` in `lib/query/provider.tsx`.
+- Components read via `useQuery(queryOptions.foo(...))` or via domain hooks in `hooks/domains/<x>/`. Never call fetch APIs directly in components.
+- Zustand still owns client-only state (active IDs, UI toggles, layout) and serves as the transitional mirror for not-yet-migrated server state.
 
 ### Store Structure (Domain Slices)
+
+These slices hold **client-only state** (active IDs, UI toggles, layout) and serve as transitional mirrors for server state not yet fully migrated to TanStack Query.
 
 ```
 lib/state/
@@ -293,7 +294,25 @@ lib/api/domains/                    # API clients
 
 **Hydration:** `lib/state/hydration/merge-strategies.ts` has `deepMerge()`, `mergeSessionMap()`, `mergeLoadingState()` to avoid overwriting live client state. Pass `activeSessionId` to protect active sessions.
 
-**Hooks Pattern:** Hooks in `hooks/domains/` encapsulate WS subscription + store selection. WS client deduplicates subscriptions automatically.
+### Query Layer
+
+TanStack Query is the canonical server-state layer. Migrated domains: features, comments, integrations, automations, workspace, settings, jira, linear, github, gitlab, kanban, office, session, session-runtime. (`features` and `automations` Zustand slices were fully removed; the rest are transitional mirrors.)
+
+```
+lib/query/
+├── keys.ts             # qk.* typed key factories (single source of truth for cache keys)
+├── query-options/      # per-domain queryOptions() — used in useQuery + SSR prefetch
+├── bridge/             # WS→TQ-cache handlers (transitional, registered from QueryBridge)
+├── streams/            # ring buffers for high-frequency streams (shell/process/terminal)
+├── client.ts
+└── provider.tsx        # QueryProvider + QueryBridge
+```
+
+**Bridge contract:** each `bridge/<domain>.ts` mirrors `lib/ws/handlers/<domain>.ts` but writes into the TQ cache via `queryClient.setQueryData` instead of Zustand. Bridges are deleted as consumers finish reading from queries instead of the Zustand mirror.
+
+**Streams:** high-frequency output (shell, process, terminal) bypasses TQ and uses the ring-buffer registry in `lib/query/streams/ring.ts` — TQ's per-chunk notify is a perf cliff at thousands of chunks/sec.
+
+**Hooks Pattern:** Hooks in `hooks/domains/` wrap `useQuery(queryOptions.*)` (or the domain's `query-options` factory). The WS client still deduplicates subscriptions; the cache those subscriptions write into is now TanStack Query (via bridges), not Zustand.
 
 ### WS
 
@@ -332,7 +351,7 @@ Static analysis runs in CI and pre-commit. New code **must** stay within these l
 
 ### Testing
 
-Every code change must include tests for new or changed logic. Backend: `*_test.go` files alongside the source. Frontend: `*.test.ts` files for utility functions, hooks, API clients, and store slices. Exceptions: config files, generated code, React component markup. Use `/tdd` for test-driven development.
+Every code change must include tests for new or changed logic. Backend: `*_test.go` files alongside the source. Frontend: `*.test.ts` files for utility functions, hooks, API clients, store slices, query-options factories, bridge modules (under `lib/query/`), and ring buffers. Exceptions: config files, generated code, React component markup. Use `/tdd` for test-driven development.
 
 ### Knowledge
 - **Specs:** Feature specs live in `docs/specs/<slug>/spec.md` — the "what & why" of a feature, written before coding. Optional siblings: `plan.md` (how), `notes.md` (post-ship). Use `/spec` to write or update a spec. See `docs/specs/INDEX.md`.
@@ -355,7 +374,7 @@ Every code change must include tests for new or changed logic. Backend: `*_test.
 - Migration logging: `db.MigrateLogger.Apply(name, stmt)` -- success logs Info, "already exists"/"duplicate column name" is silently swallowed, anything else logs Warn but never returns an error (preserving the existing swallow-error contract).
 
 ### Frontend
-- **Data:** SSR fetch → hydrate → read store. Never fetch in components
+- **Data:** SSR prefetch into TanStack Query → components read via `useQuery(queryOptions.*)` or `hooks/domains/<x>/`. Never call fetch APIs directly in components.
 - **UI Components:**
   - Import shadcn components from `@kandev/ui`, NOT `@/components/ui/*`
   - **Always prefer native shadcn components** over custom implementations
@@ -363,7 +382,7 @@ Every code change must include tests for new or changed logic. Backend: `*_test.
   - For data tables, use `@kandev/ui/table` with TanStack Table; use shadcn Pagination components
   - Only create custom components when shadcn doesn't provide what's needed
 - **Components:** <200 lines, extract to domain components, composition over props
-- **Hooks:** Domain-organized in `hooks/domains/`, encapsulate subscription + selection
+- **Hooks:** Domain-organized in `hooks/domains/`, wrap `useQuery(queryOptions.*)` or domain `query-options` factories; WS client deduplicates subscriptions
 - **WS:** Use subscription hooks only; client auto-deduplicates
 - **Interactivity:** All buttons and links with actions must have `cursor-pointer` class
 

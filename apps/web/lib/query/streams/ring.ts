@@ -108,6 +108,23 @@ export function clearRing(key: string): void {
 }
 
 /**
+ * Removes the ring buffer entry entirely. Notifies listeners with an empty
+ * snapshot first so subscribers can re-render before unmounting.
+ * Call this when a session/process is permanently torn down.
+ */
+export function destroyRing(key: string): void {
+  const entry = registry.get(key);
+  if (!entry) return;
+  // Notify with empty snapshot before removal so live subscribers re-render.
+  entry.head = 0;
+  entry.size = 0;
+  entry.version++;
+  entry.snapshot = null;
+  notifyListeners(entry);
+  registry.delete(key);
+}
+
+/**
  * React hook: subscribes to a ring buffer and returns a snapshot of its lines.
  *
  * Uses useSyncExternalStore for concurrent-safe external subscriptions.

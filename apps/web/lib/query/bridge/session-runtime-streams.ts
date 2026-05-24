@@ -25,7 +25,7 @@
 
 import type { QueryClient } from "@tanstack/react-query";
 import type { WebSocketClient } from "@/lib/ws/client";
-import { appendToRing, clearRing } from "@/lib/query/streams/ring";
+import { appendToRing, clearRing, destroyRing } from "@/lib/query/streams/ring";
 
 // ---------------------------------------------------------------------------
 // Key helpers (exported for tests)
@@ -99,6 +99,23 @@ function registerTerminalStreamHandlers(ws: WebSocketClient): () => void {
   });
   return unsubTerminal;
 }
+
+// ---------------------------------------------------------------------------
+// Permanent teardown helpers
+// ---------------------------------------------------------------------------
+
+// TODO(destroy-ring): When the backend emits a permanent session-removed,
+// process-removed, or terminal-closed WS event, call destroyRing here:
+//
+//   destroyRing(shellRingKey(sessionId));
+//   destroyRing(passthroughRingKey(sessionId));
+//   destroyRing(processRingKey(processId));
+//   destroyRing(terminalRingKey(terminalId));
+//
+// No such event exists in the current WS protocol — add the call site once
+// the backend publishes one. The `destroyRing` export is ready in
+// lib/query/streams/ring.ts.
+export { destroyRing };
 
 // ---------------------------------------------------------------------------
 // Top-level registrar

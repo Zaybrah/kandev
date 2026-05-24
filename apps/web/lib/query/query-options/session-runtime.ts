@@ -101,7 +101,7 @@ export const contextWindowQueryOptions = (sessionId: string) =>
 
 export const sessionModeQueryOptions = (sessionId: string) =>
   queryOptions<SessionModeData | null>({
-    queryKey: ["session", sessionId, "mode"] as const,
+    queryKey: qk.session.mode(sessionId),
     queryFn: () => null,
     staleTime: SESSION_STALE_TIME,
     refetchOnWindowFocus: false,
@@ -125,7 +125,7 @@ export const sessionModelsQueryOptions = (sessionId: string) =>
 
 export const agentCapabilitiesQueryOptions = (sessionId: string) =>
   queryOptions<AgentCapabilitiesEntry | null>({
-    queryKey: ["session", sessionId, "agentCapabilities"] as const,
+    queryKey: qk.session.agentCapabilities(sessionId),
     queryFn: () => null,
     staleTime: SESSION_STALE_TIME,
     refetchOnWindowFocus: false,
@@ -137,7 +137,7 @@ export const agentCapabilitiesQueryOptions = (sessionId: string) =>
 
 export const promptUsageQueryOptions = (sessionId: string) =>
   queryOptions<PromptUsageEntry | null>({
-    queryKey: ["session", sessionId, "promptUsage"] as const,
+    queryKey: qk.session.promptUsage(sessionId),
     queryFn: () => null,
     staleTime: SESSION_STALE_TIME,
     refetchOnWindowFocus: false,
@@ -161,7 +161,7 @@ export const sessionTodosQueryOptions = (sessionId: string) =>
 
 export const availableCommandsQueryOptions = (sessionId: string) =>
   queryOptions<AvailableCommand[]>({
-    queryKey: ["session", sessionId, "availableCommands"] as const,
+    queryKey: qk.session.availableCommands(sessionId),
     queryFn: () => [],
     staleTime: SESSION_STALE_TIME,
     refetchOnWindowFocus: false,
@@ -173,7 +173,7 @@ export const availableCommandsQueryOptions = (sessionId: string) =>
 
 export const sessionPollModeQueryOptions = (sessionId: string) =>
   queryOptions<SessionPollMode | null>({
-    queryKey: ["session", sessionId, "pollMode"] as const,
+    queryKey: qk.session.pollMode(sessionId),
     queryFn: () => null,
     staleTime: SESSION_STALE_TIME,
     refetchOnWindowFocus: false,
@@ -185,7 +185,7 @@ export const sessionPollModeQueryOptions = (sessionId: string) =>
 
 export const prepareProgressQueryOptions = (sessionId: string) =>
   queryOptions<PrepareProgressState["bySessionId"][string] | null>({
-    queryKey: ["session", sessionId, "prepareProgress"] as const,
+    queryKey: qk.session.prepareProgress(sessionId),
     queryFn: () => null,
     staleTime: SESSION_STALE_TIME,
     refetchOnWindowFocus: false,

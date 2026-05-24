@@ -147,7 +147,7 @@ function registerTurnHandlers(ws: WebSocketClient, qc: QueryClient): Array<() =>
     const sid = payload.session_id as string;
     const turn = buildTurnFromPayload(payload as Record<string, unknown>);
 
-    qc.setQueryData<TurnsData>(["session", sid, "turns"] as const, (prev) => {
+    qc.setQueryData<TurnsData>(qk.session.turns(sid), (prev) => {
       const turns = prev?.turns ?? [];
       if (turns.some((t) => t.id === turn.id)) return prev ?? { turns, activeTurnId: turn.id };
       return { turns: [...turns, turn], activeTurnId: turn.id };
@@ -161,7 +161,7 @@ function registerTurnHandlers(ws: WebSocketClient, qc: QueryClient): Array<() =>
     const turnId = payload.id as string;
     const completedAt = (payload.completed_at as string | undefined) ?? new Date().toISOString();
 
-    qc.setQueryData<TurnsData>(["session", sid, "turns"] as const, (prev) => {
+    qc.setQueryData<TurnsData>(qk.session.turns(sid), (prev) => {
       if (!prev) return prev;
       const turns = prev.turns.map((t) =>
         t.id === turnId ? { ...t, completed_at: completedAt } : t,
@@ -194,10 +194,10 @@ function registerTurnHandlers(ws: WebSocketClient, qc: QueryClient): Array<() =>
 
 function registerTaskPlanHandlers(ws: WebSocketClient, qc: QueryClient): Array<() => void> {
   const invalidatePlan = (taskId: string) =>
-    void qc.invalidateQueries({ queryKey: ["session", "plans", taskId] as const });
+    void qc.invalidateQueries({ queryKey: qk.taskSession.plans(taskId) });
 
   function upsertPlan(taskId: string, plan: TaskPlan, markedSeen = false) {
-    qc.setQueryData<TaskPlanData>(["session", "plans", taskId] as const, (prev) => ({
+    qc.setQueryData<TaskPlanData>(qk.taskSession.plans(taskId), (prev) => ({
       plan,
       lastSeenUpdatedAt: markedSeen ? plan.updated_at : (prev?.lastSeenUpdatedAt ?? null),
     }));
@@ -228,7 +228,7 @@ function registerTaskPlanHandlers(ws: WebSocketClient, qc: QueryClient): Array<(
       updated_at: p.updated_at as string,
     };
     // User-authored writes mark as seen only when content changed
-    const prev = qc.getQueryData<TaskPlanData>(["session", "plans", p.task_id as string] as const);
+    const prev = qc.getQueryData<TaskPlanData>(qk.taskSession.plans(p.task_id as string));
     const contentChanged = prev?.plan?.content !== plan.content;
     const markedSeen = plan.created_by === "user" && contentChanged;
     upsertPlan(p.task_id as string, plan, markedSeen);
@@ -236,7 +236,7 @@ function registerTaskPlanHandlers(ws: WebSocketClient, qc: QueryClient): Array<(
 
   const unsubDeleted = ws.on("task.plan.deleted", (message) => {
     const taskId = message.payload.task_id as string;
-    qc.setQueryData<TaskPlanData>(["session", "plans", taskId] as const, (prev) => ({
+    qc.setQueryData<TaskPlanData>(qk.taskSession.plans(taskId), (prev) => ({
       plan: null,
       lastSeenUpdatedAt: prev?.lastSeenUpdatedAt ?? null,
     }));
@@ -246,7 +246,7 @@ function registerTaskPlanHandlers(ws: WebSocketClient, qc: QueryClient): Array<(
     const p = message.payload;
     // Revisions are managed in a separate query key; invalidate to trigger refetch
     void qc.invalidateQueries({
-      queryKey: ["session", "plans", p.task_id as string, "revisions"] as const,
+      queryKey: qk.taskSession.plansRevisions(p.task_id as string),
     });
     invalidatePlan(p.task_id as string);
   });
@@ -266,7 +266,7 @@ function registerQueueHandler(ws: WebSocketClient, qc: QueryClient): () => void 
     const sid = message.payload.session_id as string | undefined;
     if (!sid) return;
     // Invalidate the TQ queue key so the next access re-fetches
-    void qc.invalidateQueries({ queryKey: ["session", sid, "queue"] as const });
+    void qc.invalidateQueries({ queryKey: qk.session.queue(sid) });
   });
 }
 

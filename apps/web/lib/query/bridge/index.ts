@@ -12,10 +12,15 @@ import { registerJiraBridge } from "./jira";
 import { registerLinearBridge } from "./linear";
 import { registerKanbanBridge } from "./kanban";
 import { registerOfficeBridge } from "./office";
+import { registerSessionBridge } from "./session";
+import { registerSessionRuntimeBridge } from "./session-runtime";
+import { registerSessionRuntimeStreamsBridge } from "./session-runtime-streams";
 
 export interface QueryBridgeOptions {
   /** Returns the currently-active workspace ID, or undefined if none. */
   getActiveWorkspaceId: () => string | undefined;
+  /** Resolves sessionId → environmentId for session-runtime cache key routing. */
+  getEnvKey: (sessionId: string) => string;
 }
 
 /**
@@ -46,6 +51,9 @@ export function registerQueryBridge(
     registerLinearBridge(ws, queryClient),
     registerKanbanBridge(ws, queryClient),
     registerOfficeBridge(ws, queryClient, options.getActiveWorkspaceId),
+    registerSessionBridge(ws, queryClient),
+    registerSessionRuntimeBridge(ws, queryClient, options.getEnvKey),
+    registerSessionRuntimeStreamsBridge(ws, queryClient),
   ];
   return () => {
     for (const fn of cleanups) fn();

@@ -59,6 +59,8 @@ export function QueryBridge() {
     if (!ws) return;
     return registerQueryBridge(ws, queryClient, {
       getActiveWorkspaceId: () => storeApi.getState().workspaces.activeId ?? undefined,
+      getEnvKey: (sessionId: string) =>
+        storeApi.getState().environmentIdBySessionId[sessionId] ?? sessionId,
     });
   }, [queryClient, storeApi]);
 

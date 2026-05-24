@@ -127,17 +127,4 @@ export const kanbanQueryOptions = {
    *   useQuery(kanbanQueryOptions.workflow(wsId, wfId))
    */
   workflow: workflowKanbanQueryOptions,
-
-  /**
-   * Single task, derived from a workflow snapshot via select.
-   *
-   * Usage:
-   *   useQuery(kanbanQueryOptions.task(wsId, wfId, taskId))
-   */
-  task: (workspaceId: string, wfId: string, taskId: string) => ({
-    ...multiKanbanQueryOptions(workspaceId),
-    select: (data: KanbanMultiData): KanbanTask | undefined =>
-      data.snapshots[wfId]?.tasks.find((t) => t.id === taskId),
-    queryKey: qk.kanban.task(taskId),
-  }),
 };

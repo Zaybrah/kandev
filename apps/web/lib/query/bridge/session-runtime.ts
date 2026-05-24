@@ -198,13 +198,10 @@ function registerSessionDataHandlers(ws: WebSocketClient, qc: QueryClient): Arra
       name: m.name,
       description: m.description,
     }));
-    qc.setQueryData<SessionModeData | null>(
-      ["session", payload.session_id, "mode"] as const,
-      (prev) => ({
-        currentModeId: modeId,
-        availableModes: availableModes.length > 0 ? availableModes : (prev?.availableModes ?? []),
-      }),
-    );
+    qc.setQueryData<SessionModeData | null>(qk.session.mode(payload.session_id), (prev) => ({
+      currentModeId: modeId,
+      availableModes: availableModes.length > 0 ? availableModes : (prev?.availableModes ?? []),
+    }));
   });
 
   const unsubModels = ws.on("session.models_updated", (message) => {
@@ -252,7 +249,7 @@ function registerSessionDataHandlers(ws: WebSocketClient, qc: QueryClient): Arra
   const unsubPromptUsage = ws.on("session.prompt_usage", (message) => {
     const payload = message.payload as SessionPromptUsagePayload | undefined;
     if (!payload?.session_id || !payload.usage) return;
-    qc.setQueryData(["session", payload.session_id, "promptUsage"] as const, () => ({
+    qc.setQueryData(qk.session.promptUsage(payload.session_id), () => ({
       inputTokens: payload.usage.input_tokens,
       outputTokens: payload.usage.output_tokens,
       cachedReadTokens: payload.usage.cached_read_tokens,
@@ -264,7 +261,7 @@ function registerSessionDataHandlers(ws: WebSocketClient, qc: QueryClient): Arra
   const unsubCapabilities = ws.on("session.agent_capabilities", (message) => {
     const payload = message.payload as AgentCapabilitiesPayload | undefined;
     if (!payload?.session_id) return;
-    qc.setQueryData(["session", payload.session_id, "agentCapabilities"] as const, () => ({
+    qc.setQueryData(qk.session.agentCapabilities(payload.session_id), () => ({
       supportsImage: payload.supports_image,
       supportsAudio: payload.supports_audio,
       supportsEmbeddedContext: payload.supports_embedded_context,
@@ -289,7 +286,7 @@ function registerSessionDataHandlers(ws: WebSocketClient, qc: QueryClient): Arra
     if (!session_id || !poll_mode) return;
     const VALID = new Set(["fast", "slow", "paused"]);
     if (!VALID.has(poll_mode as string)) return;
-    qc.setQueryData(["session", session_id, "pollMode"] as const, () => poll_mode);
+    qc.setQueryData(qk.session.pollMode(session_id as string), () => poll_mode);
   });
 
   return [unsubMode, unsubModels, unsubTodos, unsubPromptUsage, unsubCapabilities, unsubPollMode];
@@ -334,7 +331,7 @@ function registerPrepareHandlers(ws: WebSocketClient, qc: QueryClient): Array<()
     const payload = message.payload as PrepareProgressPayload;
     if (!payload.session_id) return;
     qc.setQueryData<PrepareState | null>(
-      ["session", payload.session_id, "prepareProgress"] as const,
+      qk.session.prepareProgress(payload.session_id),
       (prev) => ({
         sessionId: payload.session_id,
         status: "preparing",
@@ -346,31 +343,28 @@ function registerPrepareHandlers(ws: WebSocketClient, qc: QueryClient): Array<()
   const unsubCompleted = ws.on("executor.prepare.completed", (message) => {
     const payload = message.payload as PrepareCompletedPayload;
     if (!payload.session_id) return;
-    qc.setQueryData<PrepareState | null>(
-      ["session", payload.session_id, "prepareProgress"] as const,
-      (prev) => {
-        const steps = payload.steps?.length
-          ? payload.steps.map((s) => ({
-              name: s.name,
-              command: s.command,
-              status: s.status,
-              output: s.output,
-              error: s.error,
-              warning: s.warning,
-              warningDetail: s.warning_detail,
-              startedAt: s.started_at,
-              endedAt: s.ended_at,
-            }))
-          : (prev?.steps ?? []);
-        return {
-          sessionId: payload.session_id,
-          status: payload.success ? "completed" : "failed",
-          steps,
-          errorMessage: payload.error_message,
-          durationMs: payload.duration_ms,
-        };
-      },
-    );
+    qc.setQueryData<PrepareState | null>(qk.session.prepareProgress(payload.session_id), (prev) => {
+      const steps = payload.steps?.length
+        ? payload.steps.map((s) => ({
+            name: s.name,
+            command: s.command,
+            status: s.status,
+            output: s.output,
+            error: s.error,
+            warning: s.warning,
+            warningDetail: s.warning_detail,
+            startedAt: s.started_at,
+            endedAt: s.ended_at,
+          }))
+        : (prev?.steps ?? []);
+      return {
+        sessionId: payload.session_id,
+        status: payload.success ? "completed" : "failed",
+        steps,
+        errorMessage: payload.error_message,
+        durationMs: payload.duration_ms,
+      };
+    });
   });
 
   return [unsubProgress, unsubCompleted];

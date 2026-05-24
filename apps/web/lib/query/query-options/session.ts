@@ -32,7 +32,7 @@ const SESSION_STALE_TIME = 5 * 60_000;
 
 export const taskSessionsQueryOptions = (taskId: string) =>
   queryOptions({
-    queryKey: ["session", "byTask", taskId] as const,
+    queryKey: qk.taskSession.byTask(taskId),
     queryFn: () => listTaskSessions(taskId),
     staleTime: SESSION_STALE_TIME,
     refetchOnWindowFocus: false,
@@ -98,7 +98,7 @@ export const sessionMessagesInfiniteQueryOptions = (sessionId: string) =>
     readonly ["session", string, "messages", "infinite"],
     string | null
   >({
-    queryKey: ["session", sessionId, "messages", "infinite"] as const,
+    queryKey: qk.session.messagesInfinite(sessionId),
     queryFn: async ({ pageParam }) => {
       const params: Parameters<typeof listTaskSessionMessages>[1] = {
         limit: 50,
@@ -131,7 +131,7 @@ export type TurnsData = {
 
 export const sessionTurnsQueryOptions = (sessionId: string) =>
   queryOptions<TurnsData>({
-    queryKey: ["session", sessionId, "turns"] as const,
+    queryKey: qk.session.turns(sessionId),
     queryFn: async () => {
       const response = await listSessionTurns(sessionId);
       return { turns: response.turns ?? [], activeTurnId: null };
@@ -151,7 +151,7 @@ export type TaskPlanData = {
 
 export const taskPlanQueryOptions = (taskId: string) =>
   queryOptions<TaskPlanData>({
-    queryKey: ["session", "plans", taskId] as const,
+    queryKey: qk.taskSession.plans(taskId),
     queryFn: async () => {
       const plan = await getTaskPlan(taskId);
       return { plan, lastSeenUpdatedAt: plan?.updated_at ?? null };
@@ -171,7 +171,7 @@ export type QueueData = {
 
 export const sessionQueueQueryOptions = (sessionId: string) =>
   queryOptions<QueueData>({
-    queryKey: ["session", sessionId, "queue"] as const,
+    queryKey: qk.session.queue(sessionId),
     queryFn: async () => {
       const status = await getQueueStatus(sessionId);
       return {

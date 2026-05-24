@@ -36,7 +36,6 @@ export const qk = {
     prefix: () => ["kanban"] as const,
     multi: () => ["kanban", "workflows"] as const,
     workflow: (wfId: string) => ["kanban", "workflows", wfId] as const,
-    task: (id: string) => ["kanban", "tasks", id] as const,
   },
 
   // -------------------------------------------------------------------------
@@ -49,12 +48,34 @@ export const qk = {
     prefix: (id: string) => ["session", id] as const,
     one: (id: string) => ["session", id] as const,
     messages: (id: string) => ["session", id, "messages"] as const,
+    messagesInfinite: (id: string) => ["session", id, "messages", "infinite"] as const,
     shell: (id: string) => ["session", id, "shell"] as const,
     git: (envKey: string) => ["session", "git", envKey] as const,
     commits: (envKey: string) => ["session", "git", envKey, "commits"] as const,
     context: (id: string) => ["session", id, "context"] as const,
     todos: (id: string) => ["session", id, "todos"] as const,
     models: (id: string) => ["session", id, "models"] as const,
+    turns: (id: string) => ["session", id, "turns"] as const,
+    mode: (id: string) => ["session", id, "mode"] as const,
+    agentCapabilities: (id: string) => ["session", id, "agentCapabilities"] as const,
+    promptUsage: (id: string) => ["session", id, "promptUsage"] as const,
+    availableCommands: (id: string) => ["session", id, "availableCommands"] as const,
+    pollMode: (id: string) => ["session", id, "pollMode"] as const,
+    prepareProgress: (id: string) => ["session", id, "prepareProgress"] as const,
+    queue: (id: string) => ["session", id, "queue"] as const,
+  },
+
+  // -------------------------------------------------------------------------
+  // TaskSession — task-ID-keyed session lookups
+  //
+  // These keys are intentionally NOT nested under qk.session.prefix(sid)
+  // because they are indexed by taskId, not sessionId. Invalidating
+  // qk.session.prefix(sid) would never reach them.
+  // -------------------------------------------------------------------------
+  taskSession: {
+    byTask: (taskId: string) => ["session", "byTask", taskId] as const,
+    plans: (taskId: string) => ["session", "plans", taskId] as const,
+    plansRevisions: (taskId: string) => ["session", "plans", taskId, "revisions"] as const,
   },
 
   // -------------------------------------------------------------------------
