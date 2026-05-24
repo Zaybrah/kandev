@@ -68,6 +68,7 @@ export type BackendMessageType =
   | "message.queue.status_changed"
   | "github.task_pr.updated"
   | "github.rate_limit.updated"
+  | "gitlab.task_mr.updated"
   | OfficeEventType
   | "run.event.appended";
 
@@ -86,6 +87,7 @@ import type {
 import type { SecretListItem } from "@/lib/types/http-secrets";
 import type { GitEventPayload } from "@/lib/types/git-events";
 import type { GitHubRateLimitUpdate, TaskPR } from "@/lib/types/github";
+import type { TaskMR } from "@/lib/types/gitlab";
 import type { FileChangeNotificationPayload } from "./workspace-files";
 import type {
   AgentCapabilitiesPayload,
@@ -580,6 +582,7 @@ export type BackendMessageMap = OfficeBackendMessageMap & {
   >;
   "github.task_pr.updated": BackendMessage<"github.task_pr.updated", TaskPR>;
   "github.rate_limit.updated": BackendMessage<"github.rate_limit.updated", GitHubRateLimitUpdate>;
+  "gitlab.task_mr.updated": BackendMessage<"gitlab.task_mr.updated", TaskMR>;
   "run.event.appended": BackendMessage<"run.event.appended", RunEventAppendedPayload>;
 };
 

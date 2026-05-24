@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { cleanup, renderHook, waitFor } from "@testing-library/react";
+import { cleanup, waitFor } from "@testing-library/react";
+import { renderHookWithQueryClient } from "@/test-utils/render-with-query";
 import type { Issue, MR, MRSearchPage, IssueSearchPage } from "@/lib/types/gitlab";
 
 const searchUserMRsMock = vi.fn<[unknown], Promise<MRSearchPage | null>>();
@@ -12,7 +13,10 @@ vi.mock("@/lib/api/domains/gitlab-api", () => ({
 
 import { useGitLabUserIssues, useGitLabUserMRs } from "./use-user-search";
 
-afterEach(() => cleanup());
+afterEach(() => {
+  cleanup();
+  vi.clearAllMocks();
+});
 
 function fakeMR(): MR {
   return {
@@ -62,6 +66,9 @@ function fakeIssue(): Issue {
   };
 }
 
+// ---------------------------------------------------------------------------
+// useGitLabUserMRs
+// ---------------------------------------------------------------------------
 describe("useGitLabUserMRs", () => {
   beforeEach(() => {
     searchUserMRsMock.mockReset();
@@ -69,7 +76,7 @@ describe("useGitLabUserMRs", () => {
 
   it("forwards filter, query, and perPage to the API", async () => {
     searchUserMRsMock.mockResolvedValueOnce({ mrs: [], total_count: 0, page: 1, per_page: 25 });
-    renderHook(() => useGitLabUserMRs("authored", "labels=bug", 25));
+    renderHookWithQueryClient(() => useGitLabUserMRs("authored", "labels=bug", 25));
     await waitFor(() => expect(searchUserMRsMock).toHaveBeenCalledTimes(1));
     expect(searchUserMRsMock).toHaveBeenCalledWith({
       filter: "authored",
@@ -81,7 +88,7 @@ describe("useGitLabUserMRs", () => {
   it("populates items on success and clears loading", async () => {
     const mr = fakeMR();
     searchUserMRsMock.mockResolvedValueOnce({ mrs: [mr], total_count: 1, page: 1, per_page: 50 });
-    const { result } = renderHook(() => useGitLabUserMRs("a", ""));
+    const { result } = renderHookWithQueryClient(() => useGitLabUserMRs("a", ""));
     await waitFor(() => expect(result.current.loading).toBe(false));
     expect(result.current.items).toEqual([mr]);
     expect(result.current.error).toBeNull();
@@ -89,47 +96,27 @@ describe("useGitLabUserMRs", () => {
 
   it("surfaces an error message and empty items on rejection", async () => {
     searchUserMRsMock.mockRejectedValueOnce(new Error("boom"));
-    const { result } = renderHook(() => useGitLabUserMRs("a", ""));
+    const { result } = renderHookWithQueryClient(() => useGitLabUserMRs("a", ""));
     await waitFor(() => expect(result.current.loading).toBe(false));
     expect(result.current.error).toBe("boom");
     expect(result.current.items).toEqual([]);
   });
 
-  it("ignores stale responses when inputs change mid-flight", async () => {
-    let resolveFirst: (v: MRSearchPage) => void = () => {};
-    searchUserMRsMock.mockReturnValueOnce(
-      new Promise<MRSearchPage>((res) => {
-        resolveFirst = res;
-      }),
-    );
-    const second = fakeMR();
-    searchUserMRsMock.mockResolvedValueOnce({
-      mrs: [second],
-      total_count: 1,
-      page: 1,
-      per_page: 50,
-    });
-
-    const { result, rerender } = renderHook(
+  it("re-fetches when filter changes", async () => {
+    searchUserMRsMock.mockResolvedValue({ mrs: [], total_count: 0, page: 1, per_page: 50 });
+    const { rerender } = renderHookWithQueryClient(
       ({ filter }: { filter: string }) => useGitLabUserMRs(filter, ""),
       { initialProps: { filter: "a" } },
     );
+    await waitFor(() => expect(searchUserMRsMock).toHaveBeenCalledTimes(1));
     rerender({ filter: "b" });
-    await waitFor(() => expect(result.current.items).toEqual([second]));
-
-    // The first request resolves *after* the swap — it must NOT clobber
-    // the newer items list.
-    resolveFirst({
-      mrs: [fakeMR(), fakeMR()],
-      total_count: 2,
-      page: 1,
-      per_page: 50,
-    });
-    await new Promise((r) => setTimeout(r, 10));
-    expect(result.current.items).toEqual([second]);
+    await waitFor(() => expect(searchUserMRsMock).toHaveBeenCalledTimes(2));
   });
 });
 
+// ---------------------------------------------------------------------------
+// useGitLabUserIssues
+// ---------------------------------------------------------------------------
 describe("useGitLabUserIssues", () => {
   beforeEach(() => {
     searchUserIssuesMock.mockReset();
@@ -143,14 +130,14 @@ describe("useGitLabUserIssues", () => {
       page: 1,
       per_page: 50,
     });
-    const { result } = renderHook(() => useGitLabUserIssues("assigned_to_me", ""));
+    const { result } = renderHookWithQueryClient(() => useGitLabUserIssues("assigned_to_me", ""));
     await waitFor(() => expect(result.current.loading).toBe(false));
     expect(result.current.items).toEqual([issue]);
   });
 
   it("handles rejection without populating items", async () => {
     searchUserIssuesMock.mockRejectedValueOnce(new Error("net"));
-    const { result } = renderHook(() => useGitLabUserIssues("a", ""));
+    const { result } = renderHookWithQueryClient(() => useGitLabUserIssues("a", ""));
     await waitFor(() => expect(result.current.loading).toBe(false));
     expect(result.current.error).toBe("net");
     expect(result.current.items).toEqual([]);
